@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hub-detect-ws
+  labels:
+    app: hub-detect-ws
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hub-detect-ws
+  template:
+    metadata:
+      labels:
+        app: hub-detect-ws
+    spec:
+      containers:
+      - name: hub-detect-ws
+        image: blackducksoftware/hub-detect-ws:0.1.0-SNAPSHOT
+        volumeMounts:
+        - name: detect-target-dir
+          mountPath: /opt/blackduck/hub-detect-ws/target
+        ports:
+        - containerPort: 8080
+          hostPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 30
+      volumes:
+      - name: detect-target-dir
+        hostPath:
+          path: /Users/sbillings/tmp/target
+          type: Directory
