@@ -31,10 +31,8 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 @Category(IntegrationTest.class)
 public class InMinikubeTest {
-    private static final String POD_NAME = "hub-imageinspector-ws";
-    private static final String PORT_ALPINE = "8080";
-    private static final String PORT_CENTOS = "8081";
-    private static final String PORT_UBUNTU = "8082";
+    private static final String POD_NAME = "hub-detect-ws";
+    private static final String PORT = "8080";
     private static KubernetesClient client;
     private static String clusterIp;
 
@@ -71,13 +69,13 @@ public class InMinikubeTest {
         execCmd("docker save -o build/test/target/alpine.tar alpine:latest", 20, dockerEnv);
         execCmd("chmod a+r build/test/target/alpine.tar", 5);
 
-        execCmd("docker pull debian:latest", 120, dockerEnv);
-        execCmd("docker save -o build/test/target/debian.tar debian:latest", 20, dockerEnv);
-        execCmd("chmod a+r build/test/target/debian.tar", 5);
-
-        execCmd("docker pull fedora:latest", 120, dockerEnv);
-        execCmd("docker save -o build/test/target/fedora.tar fedora:latest", 20, dockerEnv);
-        execCmd("chmod a+r build/test/target/fedora.tar", 5);
+        // execCmd("docker pull debian:latest", 120, dockerEnv);
+        // execCmd("docker save -o build/test/target/debian.tar debian:latest", 20, dockerEnv);
+        // execCmd("chmod a+r build/test/target/debian.tar", 5);
+        //
+        // execCmd("docker pull fedora:latest", 120, dockerEnv);
+        // execCmd("docker save -o build/test/target/fedora.tar fedora:latest", 20, dockerEnv);
+        // execCmd("chmod a+r build/test/target/fedora.tar", 5);
 
         InputStream configInputStream = InMinikubeTest.class.getResourceAsStream("kube-test-pod.yml");
         if (configInputStream == null) {
@@ -100,9 +98,7 @@ public class InMinikubeTest {
             System.out.printf("Service: %s; app: %s\n", service.getMetadata().getName(), service.getMetadata().getLabels().get("app"));
         }
         Thread.sleep(20000L);
-        assertTrue("never got a successful alpine service health check", isServiceHealthy(PORT_ALPINE));
-        assertTrue("never got a successful centos service health check", isServiceHealthy(PORT_CENTOS));
-        assertTrue("never got a successful ubuntu service health check", isServiceHealthy(PORT_UBUNTU));
+        assertTrue("never got a successful service health check", isServiceHealthy(PORT));
         System.out.println("The service is ready");
 
         Thread.sleep(20000L);
@@ -150,68 +146,10 @@ public class InMinikubeTest {
     }
 
     @Test
-    public void testAlpineOnAlpine() throws InterruptedException, IntegrationException, IOException {
-        final String getBdioOutputJoined = execCmd(String.format("curl -i http://%s:%s/getbdio?tarfile=/opt/blackduck/hub-imageinspector-ws/target/alpine.tar", clusterIp, PORT_ALPINE), 30);
+    public void test() throws InterruptedException, IntegrationException, IOException {
+        final String getBdioOutputJoined = execCmd(String.format("curl -i http://%s:%s/scaninspectimage?tarfile=/opt/blackduck/hub-detect-ws/target/alpine.tar", clusterIp, PORT), 30);
         System.out.printf("getBdioOutputJoined: %s", getBdioOutputJoined);
-        assertTrue(getBdioOutputJoined.contains("alpine_latest_lib_apk_APK"));
-        assertTrue(getBdioOutputJoined.contains("BillOfMaterials"));
-        assertTrue(getBdioOutputJoined.contains("http:alpine/libc_utils"));
-        assertTrue(getBdioOutputJoined.contains("musl/"));
-        assertTrue(getBdioOutputJoined.contains("musl_utils/"));
-        assertTrue(getBdioOutputJoined.contains("libressl2.6-libssl/"));
-        assertTrue(getBdioOutputJoined.contains("x86_64"));
-        assertTrue(getBdioOutputJoined.endsWith("]"));
-    }
-
-    @Test
-    public void testAlpineOnUbuntu() throws InterruptedException, IntegrationException, IOException {
-        final String getBdioOutputJoined = execCmd(String.format("curl -i http://%s:%s/getbdio?tarfile=/opt/blackduck/hub-imageinspector-ws/target/alpine.tar", clusterIp, PORT_UBUNTU), 10);
-        System.out.printf("getBdioOutputJoined: %s", getBdioOutputJoined);
-        final String expectedRedirect = String.format("Location: http://%s:%s/getbdio?tarfile=/opt/blackduck/hub-imageinspector-ws/target/alpine.tar&hubprojectname=&hubprojectversion=&codelocationprefix=&cleanup=true", clusterIp,
-                PORT_ALPINE);
-        assertTrue(getBdioOutputJoined.contains(String.format("%s", expectedRedirect)));
-    }
-
-    @Test
-    public void testAlpineOnCentos() throws InterruptedException, IntegrationException, IOException {
-        final String getBdioOutputJoined = execCmd(String.format("curl -i http://%s:%s/getbdio?tarfile=/opt/blackduck/hub-imageinspector-ws/target/alpine.tar", clusterIp, PORT_CENTOS), 10);
-        System.out.printf("getBdioOutputJoined: %s", getBdioOutputJoined);
-        final String expectedRedirect = String.format("Location: http://%s:%s/getbdio?tarfile=/opt/blackduck/hub-imageinspector-ws/target/alpine.tar&hubprojectname=&hubprojectversion=&codelocationprefix=&cleanup=true", clusterIp,
-                PORT_ALPINE);
-        assertTrue(getBdioOutputJoined.contains(String.format("%s", expectedRedirect)));
-    }
-
-    @Test
-    public void testFedoraOnCentos() throws InterruptedException, IntegrationException, IOException {
-        final String getBdioOutputJoined = execCmd(String.format("curl -i http://%s:%s/getbdio?tarfile=/opt/blackduck/hub-imageinspector-ws/target/fedora.tar", clusterIp, PORT_CENTOS), 120);
-        System.out.printf("getBdioOutputJoined: %s", getBdioOutputJoined);
-        assertTrue(getBdioOutputJoined.contains("file-libs/"));
-        assertTrue(getBdioOutputJoined.contains("x86_64"));
-        assertTrue(getBdioOutputJoined.endsWith("]"));
-    }
-
-    @Test
-    public void testDebianOnUbuntu() throws InterruptedException, IntegrationException, IOException {
-        final String getBdioOutputJoined = execCmd(String.format("curl -i http://%s:%s/getbdio?tarfile=/opt/blackduck/hub-imageinspector-ws/target/debian.tar", clusterIp, PORT_UBUNTU), 120);
-        System.out.printf("getBdioOutputJoined: %s", getBdioOutputJoined);
-        assertTrue(getBdioOutputJoined.contains("libsemanage-common/"));
-        assertTrue(getBdioOutputJoined.contains("amd64"));
-        assertTrue(getBdioOutputJoined.endsWith("]"));
-
-    }
-
-    @Test
-    public void testAlpineOnUbuntuFollowingRedirect() throws InterruptedException, IntegrationException, IOException {
-        final String getBdioOutputJoined = execCmd(String.format("curl -i -L http://%s:%s/getbdio?tarfile=/opt/blackduck/hub-imageinspector-ws/target/alpine.tar", clusterIp, PORT_UBUNTU), 120);
-        System.out.printf("getBdioOutputJoined: %s", getBdioOutputJoined);
-        assertTrue(getBdioOutputJoined.contains("alpine_latest_lib_apk_APK"));
-        assertTrue(getBdioOutputJoined.contains("BillOfMaterials"));
-        assertTrue(getBdioOutputJoined.contains("http:alpine/libc_utils"));
-        assertTrue(getBdioOutputJoined.contains("musl/"));
-        assertTrue(getBdioOutputJoined.contains("musl_utils/"));
-        assertTrue(getBdioOutputJoined.contains("libressl2.6-libssl/"));
-        assertTrue(getBdioOutputJoined.contains("x86_64"));
-        assertTrue(getBdioOutputJoined.endsWith("]"));
+        assertTrue(getBdioOutputJoined.contains("scan/inspect image operation mocked"));
     }
 
     private static String execCmd(final String cmd, final long timeout) throws IOException, InterruptedException, IntegrationException {
@@ -268,7 +206,7 @@ public class InMinikubeTest {
                 healthCheckOutput = execCmd(String.format("curl -i http://%s:%s/health", clusterIp, port), 10).split("\n");
                 for (final String line : healthCheckOutput) {
                     System.out.printf("Port %s Health check output: %s\n", port, line);
-                    if ((line.startsWith("HTTP")) && (line.contains(" 200"))) {
+                    if (line.startsWith("HTTP") && line.contains(" 200")) {
                         System.out.printf("Port %s Health check passed\n", port);
                         serviceIsHealthy = true;
                         break;

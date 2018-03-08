@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: hub-imageinspector-ws
+  name: hub-detect-ws
   labels:
-    app: hub-imageinspector-ws
+    app: hub-detect-ws
 spec:
   containers:
-  - name: hub-imageinspector-ws-alpine
-    image: blackducksoftware/hub-imageinspector-ws-alpine:@VERSION@
+  - name: hub-detect-ws-alpine
+    image: blackducksoftware/hub-detect-ws:@VERSION@
     volumeMounts:
-    - name: inspector-target-dir
-      mountPath: /opt/blackduck/hub-imageinspector-ws/target
+    - name: detect-target-dir
+      mountPath: /opt/blackduck/hub-detect-ws/target
     ports:
     - containerPort: 8080
       hostPort: 8080
@@ -20,36 +20,8 @@ spec:
         port: 8080
       initialDelaySeconds: 120
       periodSeconds: 30
-  - name: hub-imageinspector-ws-centos
-    image: blackducksoftware/hub-imageinspector-ws-centos:@VERSION@
-    volumeMounts:
-    - name: inspector-target-dir
-      mountPath: /opt/blackduck/hub-imageinspector-ws/target
-    ports:
-    - containerPort: 8081
-      hostPort: 8081
-    livenessProbe:
-      httpGet:
-        path: /health
-        port: 8081
-      initialDelaySeconds: 120
-      periodSeconds: 30
-  - name: hub-imageinspector-ws-ubuntu
-    image: blackducksoftware/hub-imageinspector-ws-ubuntu:@VERSION@
-    volumeMounts:
-    - name: inspector-target-dir
-      mountPath: /opt/blackduck/hub-imageinspector-ws/target
-    ports:
-    - containerPort: 8082
-      hostPort: 8082
-    livenessProbe:
-      httpGet:
-        path: /health
-        port: 8082
-      initialDelaySeconds: 120
-      periodSeconds: 30
   volumes:
-  - name: inspector-target-dir
+  - name: detect-target-dir
     hostPath:
       path: @CURRENT_DIR@/build/test/target
       type: Directory

@@ -76,17 +76,6 @@ dependencies {
     testCompile 'io.fabric8:kubernetes-model:2.0.8'
 }
 
-// Prepare test config file
-// System.getProperty("user.dir")
-task buildKubeTestPodConfig(type: Copy) {
-	from 'src/test/resources/kube-test-pod.yml'
-	into 'build/classes/java/test/com/blackducksoftware/integration/hub/detectws/app'
-	filter(ReplaceTokens, tokens: [CURRENT_DIR: System.getProperty("user.dir"), VERSION: version])
-}
-
-testIntegration.dependsOn buildKubeTestPodConfig
-
-
 //////////// Create Docker Containers ///////////
 task createDockerfile(type: Dockerfile) {
             destFile = project.file("${buildDir}/image/${appName}/Dockerfile")
@@ -129,3 +118,14 @@ task dockerLogin(type: Exec) {
 task pushImage(type: Exec, dependsOn: [buildImage, dockerLogin]) {
 	commandLine "docker", "push", "blackducksoftware/${appName}:${version}"
 }
+
+// Prepare test config file
+// System.getProperty("user.dir")
+task buildKubeTestPodConfig(type: Copy) {
+    from 'src/test/resources/kube-test-pod.yml'
+    into 'build/classes/java/test/com/blackducksoftware/integration/hub/detectws/app'
+    filter(ReplaceTokens, tokens: [CURRENT_DIR: System.getProperty("user.dir"), VERSION: version])
+}
+
+testIntegration.dependsOn buildKubeTestPodConfig
+testIntegration.dependsOn buildImage
