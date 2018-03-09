@@ -63,7 +63,7 @@ The script will start a 1-container pod, and expose port 8080. It exposes a "sca
 
 ### Configuring the service ###
 
-TBD
+No configuration is required yet (because the real work is mocked).
 
 ### Trying hub-detect-ws in a Docker environment ###
 
