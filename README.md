@@ -1,7 +1,31 @@
 ## Overview ##
 A container-based Web Service for scanning (via the file signature-basediScan) and inspecting (via the Linux package manager-based image inspector) Docker images.
 
-This service is IN DEVELOPMENT / not ready for production use. Current state: The service is callable, but mocked (doesn't actually do anything).
+This service is IN DEVELOPMENT / not ready for production use. Anything (including endpoint names) might change before it is released. Current state: The service is callable, but mocked (doesn't actually do anything).
+
+# Quick Start in a Docker Environment #
+Docker must be running.
+
+```
+git clone https://github.com/blackducksoftware/hub-detect-ws
+cd hub-detect-ws
+src/main/resources/demo-docker.sh
+curl -i http://localhost:8080/scaninspectimage?tarfile=/opt/blackduck/hub-detect-ws/target/alpine.tar
+
+```
+You should get an HTTP 200 response with "scan/inspect image operation mocked" in the body.
+
+# Quick Start in a Minikube Environment #
+Minikube must be running.
+
+```
+git clone https://github.com/blackducksoftware/hub-detect-ws
+cd hub-detect-ws
+src/main/resources/demo-minikube-start.sh
+curl -i http://192.168.99.100:8080/scaninspectimage?tarfile=/opt/blackduck/hub-detect-ws/target/alpine.tar
+```
+You should get an HTTP 200 response with "scan/inspect image operation mocked" in the body.
+
 
 # Build #
 TBD

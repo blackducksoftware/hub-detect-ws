@@ -84,7 +84,7 @@ echo "Pausing to give the new service time to start..."
 sleep 10
 
 echo "--------------------------------------------------------------"
-echo "Using service to get BDIO for alpine"
+echo "To use service to get BDIO for alpine"
 echo "--------------------------------------------------------------"
 clusterIp=$(minikube ip)
 ##servicePort=$(kubectl describe services hub-detect-ws|grep -v '^Type:'|grep NodePort|awk '{print $3}'|sed 's/\/TCP//')
@@ -93,13 +93,13 @@ cmd="curl -i http://${clusterIp}:${servicePort}/scaninspectimage?tarfile=/opt/bl
 echo "${cmd}"
 ######$cmd
 echo "--------------------------------------------------------------"
-echo "Using service to get BDIO for fedora"
+echo "To use service to get BDIO for fedora"
 echo "--------------------------------------------------------------"
 cmd="curl -i http://${clusterIp}:${servicePort}/scaninspectimage?tarfile=/opt/blackduck/hub-detect-ws/target/fedora.tar"
 echo "${cmd}"
 ######$cmd
 echo "--------------------------------------------------------------"
-echo "Using service to get BDIO for debian"
+echo "To use service to get BDIO for debian"
 echo "--------------------------------------------------------------"
 cmd="curl -i http://${clusterIp}:${servicePort}/scaninspectimage?tarfile=/opt/blackduck/hub-detect-ws/target/debian.tar"
 echo "${cmd}"
