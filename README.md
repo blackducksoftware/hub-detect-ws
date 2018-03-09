@@ -1,5 +1,5 @@
 ## Overview ##
-A container-based Web Service for scanning (via the file signature-basediScan) and inspecting (via the Linux package manager-based image inspector) Docker images.
+A container-based Web Service for scanning (via the file signature-based iScan) and inspecting (via the Linux package manager-based image inspector) Docker images.
 
 This service is IN DEVELOPMENT / not ready for production use. Anything (including endpoint names) might change before it is released. Current state: The service is callable, but mocked (doesn't actually do anything).
 
