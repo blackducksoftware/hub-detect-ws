@@ -47,7 +47,7 @@ public class DetectServiceController {
     @Autowired
     private DetectServiceHandler imageInspectorHandler;
 
-    @RequestMapping(path = SCAN_INSPECT_IMAGE, method = RequestMethod.GET)
+    @RequestMapping(path = SCAN_INSPECT_IMAGE, method = RequestMethod.POST)
     public ResponseEntity<String> scanImage(final HttpServletRequest request, @RequestParam(value = TARFILE_PATH_QUERY_PARAM) final String tarFilePath,
             @RequestParam(value = HUB_PROJECT_NAME_QUERY_PARAM, defaultValue = "") final String hubProjectName, @RequestParam(value = HUB_PROJECT_VERSION_QUERY_PARAM, defaultValue = "") final String hubProjectVersion,
             @RequestParam(value = CODELOCATION_PREFIX_QUERY_PARAM, defaultValue = "") final String codeLocationPrefix,

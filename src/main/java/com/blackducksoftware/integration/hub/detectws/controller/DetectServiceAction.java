@@ -44,6 +44,6 @@ public class DetectServiceAction {
         final String msg = String.format("hub-detect-ws v%s: dockerTarfilePath: %s, hubProjectName: %s, hubProjectVersion: %s, codeLocationPrefix: %s, cleanupWorkingDir: %b", programVersion.getProgramVersion(), dockerTarfilePath,
                 hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir);
         logger.info(msg);
-        return "scan/inspect image operation mocked";
+        return "scan/inspect image acceptance mocked";
     }
 }

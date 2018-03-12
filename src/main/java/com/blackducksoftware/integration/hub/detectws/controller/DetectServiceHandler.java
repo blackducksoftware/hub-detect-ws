@@ -44,7 +44,7 @@ public class DetectServiceHandler {
             final String codeLocationPrefix, final boolean cleanupWorkingDir) {
         try {
             final String bdio = imageInspectorAction.scanImage(tarFilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir);
-            return responseFactory.createResponse(bdio);
+            return responseFactory.createResponseAccepted(bdio);
         } catch (final Exception e) {
             logger.error(String.format("Exception thrown while getting image packages: %s", e.getMessage()), e);
             return responseFactory.createResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());

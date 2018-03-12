@@ -147,9 +147,11 @@ public class InMinikubeTest {
 
     @Test
     public void test() throws InterruptedException, IntegrationException, IOException {
-        final String getBdioOutputJoined = execCmd(String.format("curl -i http://%s:%s/scaninspectimage?tarfile=/opt/blackduck/hub-detect-ws/target/alpine.tar", clusterIp, PORT), 30);
+        final String getBdioOutputJoined = execCmd(String.format("curl -X POST -i http://%s:%s/scaninspectimage?tarfile=/opt/blackduck/hub-detect-ws/target/alpine.tar", clusterIp, PORT), 30);
         System.out.printf("getBdioOutputJoined: %s", getBdioOutputJoined);
-        assertTrue(getBdioOutputJoined.contains("scan/inspect image operation mocked"));
+        assertTrue(getBdioOutputJoined.contains("HTTP/1.1 202"));
+        assertTrue(getBdioOutputJoined.contains("scan/inspect image acceptance mocked"));
+
     }
 
     private static String execCmd(final String cmd, final long timeout) throws IOException, InterruptedException, IntegrationException {
