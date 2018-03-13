@@ -52,13 +52,18 @@ public class DetectServiceAction {
                 hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir);
         logger.info(msg);
         downloadDetect();
-        launchDetectAsync();
+        launchDetectAsync(dockerTarfilePath);
         return "scan/inspect image acceptance mocked";
     }
 
-    private void launchDetectAsync() {
+    private void launchDetectAsync(final String dockerTarfilePath) {
         logger.info("Launching detect");
-        final AsyncCmdExecutor executor = new AsyncCmdExecutor("/tmp/detect.sh --help", null, 5, null);
+        final AsyncCmdExecutor executor = new AsyncCmdExecutor(
+                String.format(
+                        "/tmp/detect.sh --blackduck.hub.url=https://int-hub04.dc1.lan --blackduck.hub.username=sysadmin --blackduck.hub.password=blackduck --detect.hub.signature.scanner.paths=%s --blackduck.hub.trust.cert=true",
+                        dockerTarfilePath),
+                null, 5,
+                null);
         final ExecutorService executorService = Executors.newSingleThreadExecutor();
         // final Future<String> containerCleanerFuture =
         executorService.submit(executor);
