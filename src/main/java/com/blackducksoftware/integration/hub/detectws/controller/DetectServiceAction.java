@@ -57,11 +57,15 @@ public class DetectServiceAction {
     }
 
     private void launchDetectAsync(final String dockerTarfilePath) {
+        final String realCmd = String.format(
+                "/tmp/detect.sh --blackduck.hub.url=https://int-hub04.dc1.lan --blackduck.hub.username=sysadmin --blackduck.hub.password=blackduck --detect.hub.signature.scanner.paths=%s --blackduck.hub.trust.cert=true",
+                dockerTarfilePath);
+        final String testCmd = "/tmp/detect.sh --help";
+        final String failingCmd = "cat tttttttt";
+
         logger.info("Launching detect");
         final AsyncCmdExecutor executor = new AsyncCmdExecutor(
-                String.format(
-                        "/tmp/detect.sh --blackduck.hub.url=https://int-hub04.dc1.lan --blackduck.hub.username=sysadmin --blackduck.hub.password=blackduck --detect.hub.signature.scanner.paths=%s --blackduck.hub.trust.cert=true",
-                        dockerTarfilePath),
+                failingCmd,
                 null, 5,
                 null);
         final ExecutorService executorService = Executors.newSingleThreadExecutor();

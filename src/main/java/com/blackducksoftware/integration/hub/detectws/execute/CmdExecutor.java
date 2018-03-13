@@ -34,9 +34,14 @@ import java.lang.ProcessBuilder.Redirect;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.blackducksoftware.integration.exception.IntegrationException;
 
 public class CmdExecutor {
+    private final static Logger logger = LoggerFactory.getLogger(CmdExecutor.class);
+
     public static String execCmd(final String cmd, final String stdinString, final long timeoutSeconds, final Map<String, String> env) throws IOException, InterruptedException, IntegrationException {
         System.out.println(String.format("Executing: %s", cmd));
         final ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
@@ -59,9 +64,10 @@ public class CmdExecutor {
             throw new InterruptedException("Command timed out");
         }
         final int retCode = p.exitValue();
+        final String stderr = toString(p.getErrorStream());
+        System.out.println(String.format("%s: stderr: %s", cmd, stderr));
         if (retCode != 0) {
-            final String stderr = toString(p.getErrorStream());
-            System.out.println(String.format("%s: stderr: %s", cmd, stderr));
+            logger.error(String.format("return code from command '%s' is: %d", cmd, retCode));
             throw new IntegrationException(String.format("Command failed: %s", stderr));
         }
         return toString(p.getInputStream());
