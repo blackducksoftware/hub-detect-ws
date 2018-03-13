@@ -23,6 +23,8 @@
  */
 package com.blackducksoftware.integration.hub.detectws.execute;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -31,24 +33,35 @@ import org.slf4j.LoggerFactory;
 
 public class AsyncCmdExecutor implements Callable<String> {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Map<String, String> environmentVariables;
+    private final String exePath;
+    private final List<String> args;
 
-    private final String cmd;
-    private final String stdinString;
-    private final long timeoutSeconds;
-    private final Map<String, String> env;
-
-    public AsyncCmdExecutor(final String cmd, final String stdinString, final long timeoutSeconds, final Map<String, String> env) {
-        this.cmd = cmd;
-        this.stdinString = stdinString;
-        this.timeoutSeconds = timeoutSeconds;
-        this.env = env;
+    public AsyncCmdExecutor(final Map<String, String> environmentVariables, final String exePath, final List<String> args) {
+        if (environmentVariables == null) {
+            this.environmentVariables = new HashMap<>();
+        } else {
+            this.environmentVariables = environmentVariables;
+        }
+        this.exePath = exePath;
+        this.args = args;
     }
 
     @Override
     public String call() throws Exception {
-        final String cmdOutput = CmdExecutor.execCmd(cmd, stdinString, timeoutSeconds, env);
-        logger.info(String.format("Command: '%s'; Output: %s", cmd, cmdOutput));
-        return cmdOutput;
+        return SimpleExecutor.execute(new HashMap<String, String>(), exePath, args);
+
+        // final Executable executor = new Executable(new File("."), environmentVariables, exePath, args);
+        // final ExecutableRunner runner = new ExecutableRunner();
+        // final ExecutableOutput out = runner.execute(executor);
+        // final List<String> stderrList = out.getErrorOutputAsList();
+        // final List<String> stdout = out.getStandardOutputAsList();
+        //
+        // final String argsString = StringUtils.join(args, ' ');
+        // final String stderrString = StringUtils.join(stderrList, '\n');
+        // final String stdoutString = StringUtils.join(stdout, '\n');
+        // logger.info(String.format("Command: '%s %s'; Output: %s; stderr: %s", exePath, argsString, stdoutString, stderrString));
+        // return stdoutString;
     }
 
 }

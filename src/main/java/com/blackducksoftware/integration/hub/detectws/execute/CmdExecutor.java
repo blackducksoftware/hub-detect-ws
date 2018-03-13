@@ -42,7 +42,7 @@ import com.blackducksoftware.integration.exception.IntegrationException;
 public class CmdExecutor {
     private final static Logger logger = LoggerFactory.getLogger(CmdExecutor.class);
 
-    public static String execCmd(final String cmd, final String stdinString, final long timeoutSeconds, final Map<String, String> env) throws IOException, InterruptedException, IntegrationException {
+    private static String execCmd(final String cmd, final String stdinString, final long timeoutSeconds, final Map<String, String> env) throws IOException, InterruptedException, IntegrationException {
         System.out.println(String.format("Executing: %s", cmd));
         final ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
         pb.redirectOutput(Redirect.PIPE);

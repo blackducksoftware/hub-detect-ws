@@ -23,13 +23,14 @@
  */
 package com.blackducksoftware.integration.hub.detectws.controller;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,8 @@ import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.detectws.execute.AsyncCmdExecutor;
-import com.blackducksoftware.integration.hub.detectws.execute.CmdExecutor;
+import com.blackducksoftware.integration.hub.detectws.execute.SimpleExecutor;
+import com.blackducksoftware.integration.hub.detectws.execute.fromdetect.ExecutableRunnerException;
 
 @Component
 public class DetectServiceAction {
@@ -47,7 +49,7 @@ public class DetectServiceAction {
     private ProgramVersion programVersion;
 
     public String scanImage(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir)
-            throws IntegrationException, IOException, InterruptedException {
+            throws IntegrationException, IOException, InterruptedException, ExecutableRunnerException {
         final String msg = String.format("hub-detect-ws v%s: dockerTarfilePath: %s, hubProjectName: %s, hubProjectVersion: %s, codeLocationPrefix: %s, cleanupWorkingDir: %b", programVersion.getProgramVersion(), dockerTarfilePath,
                 hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir);
         logger.info(msg);
@@ -62,22 +64,29 @@ public class DetectServiceAction {
                 dockerTarfilePath);
         final String testCmd = "/tmp/detect.sh --help";
         final String failingCmd = "cat tttttttt";
+        final String testCmdExe = "/tmp/detect.sh";
+        final List<String> testCmdArgs = Arrays.asList("--help");
 
         logger.info("Launching detect");
         final AsyncCmdExecutor executor = new AsyncCmdExecutor(
-                failingCmd,
-                null, 5,
-                null);
+                null,
+                testCmdExe, testCmdArgs);
         final ExecutorService executorService = Executors.newSingleThreadExecutor();
         // final Future<String> containerCleanerFuture =
         executorService.submit(executor);
     }
 
-    private void downloadDetect() throws IOException, InterruptedException, IntegrationException {
+    private void downloadDetect() throws IOException, InterruptedException, IntegrationException, ExecutableRunnerException {
         logger.info("Downloading detect");
-        final String detectScriptString = CmdExecutor.execCmd("curl -s https://blackducksoftware.github.io/hub-detect/hub-detect.sh", null, 5, null);
-        FileUtils.writeStringToFile(new File("/tmp/detect.sh"), detectScriptString, StandardCharsets.UTF_8);
-        logger.info("Making detect executable");
-        CmdExecutor.execCmd("chmod +x /tmp/detect.sh", null, 5, null);
+        // final String detectScriptString = CmdExecutor.execCmd("curl -s https://blackducksoftware.github.io/hub-detect/hub-detect.sh", null, 5, null);
+        // FileUtils.writeStringToFile(new File("/tmp/detect.sh"), detectScriptString, StandardCharsets.UTF_8);
+        // logger.info("Making detect executable");
+        // CmdExecutor.execCmd("chmod +x /tmp/detect.sh", null, 5, null);
+
+        final Map<String, String> environmentVariables = new HashMap<>();
+        final String exePath = "curl";
+        final List<String> args = Arrays.asList("-s", "https://blackducksoftware.github.io/hub-detect/hub-detect.sh");
+        SimpleExecutor.execute(environmentVariables, exePath, args);
     }
+
 }
