@@ -64,13 +64,16 @@ public class DetectServiceAction {
                 dockerTarfilePath);
         final String testCmd = "/tmp/detect.sh --help";
         final String failingCmd = "cat tttttttt";
-        final String testCmdExe = "/tmp/detect.sh";
+        final String detectExe = "/tmp/detect.sh";
         final List<String> testCmdArgs = Arrays.asList("--help");
+        final List<String> detectCmdArgs = Arrays.asList("--blackduck.hub.url=https://int-hub04.dc1.lan", "--blackduck.hub.username=sysadmin", "--blackduck.hub.password=blackduck",
+                String.format("--detect.hub.signature.scanner.paths=%s", dockerTarfilePath),
+                "--blackduck.hub.trust.cert=true");
 
         logger.info("Launching detect");
         final AsyncCmdExecutor executor = new AsyncCmdExecutor(
                 null,
-                testCmdExe, testCmdArgs);
+                detectExe, detectCmdArgs);
         final ExecutorService executorService = Executors.newSingleThreadExecutor();
         // final Future<String> containerCleanerFuture =
         executorService.submit(executor);
