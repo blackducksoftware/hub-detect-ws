@@ -39,8 +39,8 @@ import com.blackducksoftware.integration.hub.detectws.execute.fromdetect.Executa
 public class SimpleExecutor {
     private static final Logger logger = LoggerFactory.getLogger(SimpleExecutor.class);
 
-    public static String execute(final Map<String, String> environmentVariables, final String exePath, final List<String> args) throws ExecutableRunnerException {
-        final Executable executor = new Executable(new File("."), environmentVariables, exePath, args);
+    public static String execute(final File workingDir, final Map<String, String> environmentVariables, final String exePath, final List<String> args) throws ExecutableRunnerException {
+        final Executable executor = new Executable(workingDir, environmentVariables, exePath, args);
         final ExecutableRunner runner = new ExecutableRunner();
         final ExecutableOutput out = runner.execute(executor);
         final List<String> stderrList = out.getErrorOutputAsList();

@@ -23,6 +23,7 @@
  */
 package com.blackducksoftware.integration.hub.detectws.execute;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,11 +34,13 @@ import org.slf4j.LoggerFactory;
 
 public class AsyncCmdExecutor implements Callable<String> {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final File workingDir;
     private final Map<String, String> environmentVariables;
     private final String exePath;
     private final List<String> args;
 
-    public AsyncCmdExecutor(final Map<String, String> environmentVariables, final String exePath, final List<String> args) {
+    public AsyncCmdExecutor(final File workingDir, final Map<String, String> environmentVariables, final String exePath, final List<String> args) {
+        this.workingDir = workingDir;
         if (environmentVariables == null) {
             this.environmentVariables = new HashMap<>();
         } else {
@@ -49,7 +52,7 @@ public class AsyncCmdExecutor implements Callable<String> {
 
     @Override
     public String call() throws Exception {
-        return SimpleExecutor.execute(new HashMap<String, String>(), exePath, args);
+        return SimpleExecutor.execute(workingDir, environmentVariables, exePath, args);
 
         // final Executable executor = new Executable(new File("."), environmentVariables, exePath, args);
         // final ExecutableRunner runner = new ExecutableRunner();

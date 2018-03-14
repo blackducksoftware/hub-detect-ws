@@ -23,14 +23,18 @@
  */
 package com.blackducksoftware.integration.hub.detectws.controller;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +48,11 @@ import com.blackducksoftware.integration.hub.detectws.execute.fromdetect.Executa
 
 @Component
 public class DetectServiceAction {
+    private static final String PGM_DIR = "/opt/blackduck/hub-detect-ws";
+    private static final String SRC_DIR_PATH = "/opt/blackduck/hub-detect-ws/source";
+    private static final String OUTPUT_DIR_PATH = "/opt/blackduck/hub-detect-ws/output";
+    private static final String DETECT_EXE_PATH = "/opt/blackduck/hub-detect-ws/detect.sh";
+
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
@@ -55,17 +64,23 @@ public class DetectServiceAction {
         final String msg = String.format("hub-detect-ws v%s: dockerTarfilePath: %s, hubProjectName: %s, hubProjectVersion: %s, codeLocationPrefix: %s, cleanupWorkingDir: %b", programVersion.getProgramVersion(), dockerTarfilePath,
                 hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir);
         logger.info(msg);
-        downloadDetect();
-        launchDetectAsync(dockerTarfilePath, hubProjectName, hubProjectVersion);
+        final File pgmDir = new File(PGM_DIR);
+        downloadDetect(pgmDir);
+        launchDetectAsync(pgmDir, dockerTarfilePath, hubProjectName, hubProjectVersion);
         return "scan/inspect image acceptance mocked";
     }
 
-    private void launchDetectAsync(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion) {
+    private void launchDetectAsync(final File pgmDir, final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion) {
         // TODO add support for project name/version with spaces
-        final String detectExe = "/tmp/detect.sh";
+        final long timestamp = new Date().getTime();
+        final String outputFilePath = String.format("%s/run_%d", OUTPUT_DIR_PATH, timestamp);
+
         final List<String> detectCmdArgs = Arrays.asList("--blackduck.hub.url=https://int-hub04.dc1.lan", "--blackduck.hub.username=sysadmin", "--blackduck.hub.password=blackduck",
                 String.format("--detect.hub.signature.scanner.paths=%s", dockerTarfilePath),
-                "--blackduck.hub.trust.cert=true", "--detect.excluded.bom.tool.types=GRADLE");
+                "--blackduck.hub.trust.cert=true", "--detect.excluded.bom.tool.types=GRADLE",
+                String.format("--detect.output.path=%s", outputFilePath),
+                "--logging.level.com.blackducksoftware.integration=DEBUG",
+                String.format("--detect.source.path=%s", SRC_DIR_PATH));
         if (StringUtils.isNotBlank(hubProjectName)) {
             detectCmdArgs.add(String.format("--detect.project.name=%s", hubProjectName));
         }
@@ -74,25 +89,23 @@ public class DetectServiceAction {
         }
 
         logger.info("Launching detect");
-        final AsyncCmdExecutor executor = new AsyncCmdExecutor(
+        final AsyncCmdExecutor executor = new AsyncCmdExecutor(pgmDir,
                 null,
-                detectExe, detectCmdArgs);
+                DETECT_EXE_PATH, detectCmdArgs);
         final ExecutorService executorService = Executors.newSingleThreadExecutor();
         // final Future<String> containerCleanerFuture =
         executorService.submit(executor);
     }
 
-    private void downloadDetect() throws IOException, InterruptedException, IntegrationException, ExecutableRunnerException {
+    private void downloadDetect(final File pgmDir) throws IOException, InterruptedException, IntegrationException, ExecutableRunnerException {
         logger.info("Downloading detect");
-        // final String detectScriptString = CmdExecutor.execCmd("curl -s https://blackducksoftware.github.io/hub-detect/hub-detect.sh", null, 5, null);
-        // FileUtils.writeStringToFile(new File("/tmp/detect.sh"), detectScriptString, StandardCharsets.UTF_8);
-        // logger.info("Making detect executable");
-        // CmdExecutor.execCmd("chmod +x /tmp/detect.sh", null, 5, null);
-
         final Map<String, String> environmentVariables = new HashMap<>();
         final String exePath = "curl";
         final List<String> args = Arrays.asList("-s", "https://blackducksoftware.github.io/hub-detect/hub-detect.sh");
-        SimpleExecutor.execute(environmentVariables, exePath, args);
+        final String detectScriptString = SimpleExecutor.execute(pgmDir, environmentVariables, exePath, args);
+        final File detectScriptFile = new File(DETECT_EXE_PATH);
+        FileUtils.write(detectScriptFile, detectScriptString, StandardCharsets.UTF_8);
+        detectScriptFile.setExecutable(true);
     }
 
 }
