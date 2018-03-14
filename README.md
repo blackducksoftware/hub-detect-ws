@@ -50,9 +50,9 @@ You only need files in the src/main/resources directory (and images that they do
 
 ### Hub Detect Service Endpoint ###
 
-GET /scaninspectimage
+POST /scaninspectimage
 * Mandatory query param: tarfile=`<path to Docker image tarfile>`
-* Optional query params:
+* Optional query params (not working yet):
 ** hubprojectname=`<Hub project name>`
 ** hubprojectversion=`<Hub project version>`
 ** codelocationprefix=`<Hub CodeLocation name prefix>`
