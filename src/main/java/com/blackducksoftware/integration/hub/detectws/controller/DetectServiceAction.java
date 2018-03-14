@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,25 +51,27 @@ public class DetectServiceAction {
 
     public String scanImage(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir)
             throws IntegrationException, IOException, InterruptedException, ExecutableRunnerException {
+        // TODO Do something with codelocationprefix and cleanup args
         final String msg = String.format("hub-detect-ws v%s: dockerTarfilePath: %s, hubProjectName: %s, hubProjectVersion: %s, codeLocationPrefix: %s, cleanupWorkingDir: %b", programVersion.getProgramVersion(), dockerTarfilePath,
                 hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir);
         logger.info(msg);
         downloadDetect();
-        launchDetectAsync(dockerTarfilePath);
+        launchDetectAsync(dockerTarfilePath, hubProjectName, hubProjectVersion);
         return "scan/inspect image acceptance mocked";
     }
 
-    private void launchDetectAsync(final String dockerTarfilePath) {
-        final String realCmd = String.format(
-                "/tmp/detect.sh --blackduck.hub.url=https://int-hub04.dc1.lan --blackduck.hub.username=sysadmin --blackduck.hub.password=blackduck --detect.hub.signature.scanner.paths=%s --blackduck.hub.trust.cert=true",
-                dockerTarfilePath);
-        final String testCmd = "/tmp/detect.sh --help";
-        final String failingCmd = "cat tttttttt";
+    private void launchDetectAsync(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion) {
+        // TODO add support for project name/version with spaces
         final String detectExe = "/tmp/detect.sh";
-        final List<String> testCmdArgs = Arrays.asList("--help");
         final List<String> detectCmdArgs = Arrays.asList("--blackduck.hub.url=https://int-hub04.dc1.lan", "--blackduck.hub.username=sysadmin", "--blackduck.hub.password=blackduck",
                 String.format("--detect.hub.signature.scanner.paths=%s", dockerTarfilePath),
-                "--blackduck.hub.trust.cert=true");
+                "--blackduck.hub.trust.cert=true", "--detect.excluded.bom.tool.types=GRADLE");
+        if (StringUtils.isNotBlank(hubProjectName)) {
+            detectCmdArgs.add(String.format("--detect.project.name=%s", hubProjectName));
+        }
+        if (StringUtils.isNotBlank(hubProjectName)) {
+            detectCmdArgs.add(String.format("--detect.project.version.name=%s", hubProjectVersion));
+        }
 
         logger.info("Launching detect");
         final AsyncCmdExecutor executor = new AsyncCmdExecutor(
