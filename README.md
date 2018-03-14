@@ -1,7 +1,7 @@
 ## Overview ##
 A container-based Web Service for scanning (via the file signature-based iScan) and inspecting (via the Linux package manager-based image inspector) Docker images.
 
-This service is IN DEVELOPMENT / not ready for production use. Anything (including endpoint names) might change before it is released. Current state: The service is only runs iScan on the target image tarfile; it does not run the image inspector yet.
+This service is IN DEVELOPMENT / not ready for production use. Anything (including endpoint names) might change before it is released. Current state: The service only runs iScan on the target image tarfile; it does not run the image inspector yet.
 
 # Quick Start in a Docker Environment #
 Docker must be running.
@@ -13,7 +13,10 @@ src/main/resources/demo-docker.sh
 curl -X POST -i http://localhost:8080/scaninspectimage?tarfile=/opt/blackduck/hub-detect-ws/target/alpine.tar
 
 ```
-You should get an HTTP 200 response with "scan/inspect image operation mocked" in the body.
+You should get an HTTP 202 response indicating that the request was accepted. When it's done, a Scan will appear on the Hub's Scans screen. To get the log:
+```
+docker logs hub-detect-ws
+```
 
 # Quick Start in a Minikube Environment #
 Minikube must be running.
@@ -24,8 +27,11 @@ cd hub-detect-ws
 src/main/resources/demo-minikube-start.sh
 curl -X POST -i http://$(minikube ip):8080/scaninspectimage?tarfile=/opt/blackduck/hub-detect-ws/target/alpine.tar
 ```
-You should get an HTTP 200 response with "scan/inspect image operation mocked" in the body.
-
+You should get an HTTP 202 response indicating that the request was accepted. When it's done, a Scan will appear on the Hub's Scans screen. To get the log:
+```
+kubectl get pods # get the pod name (starts with hub-detect-ws)
+kubectl logs <podname> -c hub-detect-ws
+```
 
 # Build #
 TBD
