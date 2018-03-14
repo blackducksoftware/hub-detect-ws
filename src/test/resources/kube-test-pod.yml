@@ -6,7 +6,7 @@ metadata:
     app: hub-detect-ws
 spec:
   containers:
-  - name: hub-detect-ws-alpine
+  - name: hub-detect-ws
     image: blackducksoftware/hub-detect-ws:@VERSION@
     volumeMounts:
     - name: detect-target-dir
