@@ -80,10 +80,13 @@ dependencies {
 task createDockerfile(type: Dockerfile) {
             destFile = project.file("${buildDir}/image/${appName}/Dockerfile")
             println "destFile: ${destFile}"
-            from 'alpine:3.5'
+            from 'ubuntu:16.04'
             maintainer 'Synosys Software Integrity Group'
             exposePort 8080
-            runCommand 'apk update && apk add bash && apk add openjdk8-jre && apk add curl && apk add file'
+            // TODO remove: runCommand 'apk update && apk add bash && apk add openjdk8-jre && apk add curl && apk add file'
+            runCommand 'apt-get update -y && \
+                apt install -y openjdk-8-jdk vim curl && \
+                apt-get -y clean'
             runCommand "mkdir -p ${imagePgmDir}/target"
             
             runCommand "mkdir -p ${imagePgmDir}/source"
