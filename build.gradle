@@ -83,7 +83,7 @@ task createDockerfile(type: Dockerfile) {
             from 'alpine:3.5'
             maintainer 'Synosys Software Integrity Group'
             exposePort 8080
-            runCommand 'apk update && apk add bash && apk add openjdk8-jre'
+            runCommand 'apk update && apk add bash && apk add openjdk8-jre && apk add curl'
             runCommand "mkdir -p ${imagePgmDir}/target"
             addFile("${appName}-${version}.jar", "${imagePgmDir}/${appName}.jar")
             runCommand "chown -R 10001 ${imagePgmDir}"
