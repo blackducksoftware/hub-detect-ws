@@ -53,4 +53,19 @@ public class DetectServiceHandler {
         }
     }
 
+    public ResponseEntity<String> ready(final String scheme, final String host, final int port, final String requestUri) {
+        logger.info("readiness check");
+        try {
+            final boolean readyResponse = imageInspectorAction.ready();
+            if (readyResponse) {
+                return responseFactory.createResponse(HttpStatus.OK, "");
+            } else {
+                return responseFactory.createResponse(HttpStatus.SERVICE_UNAVAILABLE, "Service is busy");
+            }
+        } catch (final Exception e) {
+            logger.error(String.format("Exception thrown while getting image packages: %s", e.getMessage()), e);
+            return responseFactory.createResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
 }

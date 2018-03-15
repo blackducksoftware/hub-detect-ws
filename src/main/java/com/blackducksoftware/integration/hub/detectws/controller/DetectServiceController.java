@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class DetectServiceController {
     // Endpoint
     private static final String SCAN_INSPECT_IMAGE = "/scaninspectimage";
+    private static final String READY_TO_SCANINSPECT = "/ready";
     // Mandatory query param
     static final String TARFILE_PATH_QUERY_PARAM = "tarfile";
     // Optional query params
@@ -53,5 +54,10 @@ public class DetectServiceController {
             @RequestParam(value = CODELOCATION_PREFIX_QUERY_PARAM, defaultValue = "") final String codeLocationPrefix,
             @RequestParam(value = CLEANUP_WORKING_DIR_QUERY_PARAM, required = false, defaultValue = "true") final boolean cleanupWorkingDir) {
         return imageInspectorHandler.scanImage(request.getScheme(), request.getServerName(), request.getServerPort(), request.getRequestURI(), tarFilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir);
+    }
+
+    @RequestMapping(path = READY_TO_SCANINSPECT, method = RequestMethod.GET)
+    public ResponseEntity<String> ready(final HttpServletRequest request) {
+        return imageInspectorHandler.ready(request.getScheme(), request.getServerName(), request.getServerPort(), request.getRequestURI());
     }
 }

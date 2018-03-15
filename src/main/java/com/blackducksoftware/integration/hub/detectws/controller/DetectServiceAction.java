@@ -70,6 +70,10 @@ public class DetectServiceAction {
         return "scan/inspect image acceptance mocked";
     }
 
+    public boolean ready() {
+        return true;
+    }
+
     private void launchDetectAsync(final File pgmDir, final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion) {
         // TODO add support for project name/version with spaces
         final long timestamp = new Date().getTime();
