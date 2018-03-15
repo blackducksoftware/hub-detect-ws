@@ -30,8 +30,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Executable {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final File workingDirectory;
     private final Map<String, String> environmentVariables = new HashMap<>();
     private final String executablePath;
@@ -51,6 +54,7 @@ public class Executable {
     }
 
     public ProcessBuilder createProcessBuilder() {
+        logger.info("******************* createProcessBuilder()");
         final List<String> processBuilderArguments = createProcessBuilderArguments();
         final ProcessBuilder processBuilder = new ProcessBuilder(processBuilderArguments);
         processBuilder.directory(workingDirectory);

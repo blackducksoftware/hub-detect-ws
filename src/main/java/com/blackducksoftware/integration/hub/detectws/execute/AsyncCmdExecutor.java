@@ -32,14 +32,18 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.hub.detectws.state.ReadyDao;
+
 public class AsyncCmdExecutor implements Callable<String> {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final ReadyDao readyDao;
     private final File workingDir;
     private final Map<String, String> environmentVariables;
     private final String exePath;
     private final List<String> args;
 
-    public AsyncCmdExecutor(final File workingDir, final Map<String, String> environmentVariables, final String exePath, final List<String> args) {
+    public AsyncCmdExecutor(final ReadyDao readyDao, final File workingDir, final Map<String, String> environmentVariables, final String exePath, final List<String> args) {
+        this.readyDao = readyDao;
         this.workingDir = workingDir;
         if (environmentVariables == null) {
             this.environmentVariables = new HashMap<>();
@@ -52,19 +56,17 @@ public class AsyncCmdExecutor implements Callable<String> {
 
     @Override
     public String call() throws Exception {
-        return SimpleExecutor.execute(workingDir, environmentVariables, exePath, args);
-
-        // final Executable executor = new Executable(new File("."), environmentVariables, exePath, args);
-        // final ExecutableRunner runner = new ExecutableRunner();
-        // final ExecutableOutput out = runner.execute(executor);
-        // final List<String> stderrList = out.getErrorOutputAsList();
-        // final List<String> stdout = out.getStandardOutputAsList();
-        //
-        // final String argsString = StringUtils.join(args, ' ');
-        // final String stderrString = StringUtils.join(stderrList, '\n');
-        // final String stdoutString = StringUtils.join(stdout, '\n');
-        // logger.info(String.format("Command: '%s %s'; Output: %s; stderr: %s", exePath, argsString, stdoutString, stderrString));
-        // return stdoutString;
+        logger.info(String.format("******************* call(); thread name: %s", Thread.currentThread().getName()));
+        if (readyDao == null) {
+            logger.info(String.format("******************* call(): readyDao is null!!!!!!!!!!!!!!!!!!!"));
+        }
+        logger.info(String.format("******************* call(): setting ready to false"));
+        readyDao.setReady(false); // TODO if I comment both calls to readyDao, it works
+        logger.info(String.format("******************* call(): calling SimpleExecutor.execute"));
+        final String stdout = SimpleExecutor.execute(workingDir, environmentVariables, exePath, args);
+        logger.info(String.format("******************* call(): SimpleExecutor.execute returned"));
+        readyDao.setReady(true);
+        return stdout;
     }
 
 }

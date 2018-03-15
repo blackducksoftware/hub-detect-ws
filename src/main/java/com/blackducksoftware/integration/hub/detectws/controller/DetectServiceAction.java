@@ -45,18 +45,22 @@ import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.detectws.execute.AsyncCmdExecutor;
 import com.blackducksoftware.integration.hub.detectws.execute.SimpleExecutor;
 import com.blackducksoftware.integration.hub.detectws.execute.fromdetect.ExecutableRunnerException;
+import com.blackducksoftware.integration.hub.detectws.state.ReadyDao;
 
 @Component
 public class DetectServiceAction {
-    private static final String PGM_DIR = "/opt/blackduck/hub-detect-ws";
-    private static final String SRC_DIR_PATH = "/opt/blackduck/hub-detect-ws/source";
-    private static final String OUTPUT_DIR_PATH = "/opt/blackduck/hub-detect-ws/output";
-    private static final String DETECT_EXE_PATH = "/opt/blackduck/hub-detect-ws/detect.sh";
+    public static final String PGM_DIR = "/opt/blackduck/hub-detect-ws";
+    private static final String SRC_DIR_PATH = String.format("%s/source", PGM_DIR);
+    private static final String OUTPUT_DIR_PATH = String.format("%s/output", PGM_DIR);
+    private static final String DETECT_EXE_PATH = String.format("%s/detect.sh", PGM_DIR);
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private ProgramVersion programVersion;
+
+    @Autowired
+    ReadyDao readyDao;
 
     public String scanImage(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir)
             throws IntegrationException, IOException, InterruptedException, ExecutableRunnerException {
@@ -71,7 +75,7 @@ public class DetectServiceAction {
     }
 
     public boolean ready() {
-        return true;
+        return readyDao.isReady();
     }
 
     private void launchDetectAsync(final File pgmDir, final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion) {
@@ -93,7 +97,7 @@ public class DetectServiceAction {
         }
 
         logger.info("Launching detect");
-        final AsyncCmdExecutor executor = new AsyncCmdExecutor(pgmDir,
+        final AsyncCmdExecutor executor = new AsyncCmdExecutor(readyDao, pgmDir,
                 null,
                 DETECT_EXE_PATH, detectCmdArgs);
         final ExecutorService executorService = Executors.newSingleThreadExecutor();
