@@ -59,11 +59,11 @@ This application can only handle one /scaninspectimage request at a time. Before
 GET /ready # Make sure this endpoint returns 200 before calling /scaninspectimage
 POST /scaninspectimage
 * Mandatory query param: tarfile=`<path to Docker image tarfile>`
-* Optional query params (not working yet):
-*   hubprojectname=`<Hub project name>`
-*   hubprojectversion=`<Hub project version>`
-*   codelocationprefix=`<Hub CodeLocation name prefix>` # currently ignored
-*   cleanup=`<cleanup working dirs when done: true or false; default: true>` # currently ignored
+* Optional query params:  
+* hubprojectname=`<Hub project name>`
+* hubprojectversion=`<Hub project version>`
+* codelocationprefix=`<Hub CodeLocation name prefix>` # currently ignored
+* cleanup=`<cleanup working dirs when done: true or false; default: true>` # currently ignored
 
 ## Trying hub-detect-ws in a Kubernetes (minikube) environment ##
 
