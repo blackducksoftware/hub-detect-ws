@@ -78,8 +78,9 @@ public class DetectServiceAction {
         return readyDao.isReady();
     }
 
-    private void launchDetectAsync(final File pgmDir, final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion) {
+    private void launchDetectAsync(final File pgmDir, final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion) throws IOException {
         // TODO add support for project name/version with spaces
+        readyDao.setReady(false);
         final long timestamp = new Date().getTime();
         final String outputFilePath = String.format("%s/run_%d", OUTPUT_DIR_PATH, timestamp);
 

@@ -23,13 +23,44 @@
  */
 package com.blackducksoftware.integration.hub.detectws.app;
 
+import java.io.IOException;
+
+import javax.annotation.PreDestroy;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+
+import com.blackducksoftware.integration.hub.detectws.state.ReadyDao;
 
 @SpringBootApplication(scanBasePackages = { "com.blackducksoftware.integration.hub.detectws" })
 public class Application {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    ReadyDao readyDao;
+
+    @Bean
+    CleanerUpper cleanerUpper() {
+        return new CleanerUpper();
+    }
 
     public static void main(final String[] args) {
         SpringApplication.run(Application.class, args);
+    }
+
+    private class CleanerUpper {
+        @PreDestroy
+        public void destroy() {
+            logger.info("destroy() called; setting ready state to false");
+            try {
+                readyDao.setReady(false);
+            } catch (final IOException e) {
+                logger.error(String.format("Error trying to set ready state to false: %s", e.getMessage()));
+            }
+        }
     }
 }

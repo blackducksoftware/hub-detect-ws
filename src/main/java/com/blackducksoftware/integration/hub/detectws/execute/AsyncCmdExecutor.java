@@ -56,15 +56,8 @@ public class AsyncCmdExecutor implements Callable<String> {
 
     @Override
     public String call() throws Exception {
-        logger.info(String.format("******************* call(); thread name: %s", Thread.currentThread().getName()));
-        if (readyDao == null) {
-            logger.info(String.format("******************* call(): readyDao is null!!!!!!!!!!!!!!!!!!!"));
-        }
-        logger.info(String.format("******************* call(): setting ready to false"));
-        readyDao.setReady(false); // TODO if I comment both calls to readyDao, it works
-        logger.info(String.format("******************* call(): calling SimpleExecutor.execute"));
+        logger.info(String.format("Worker thread: %s", Thread.currentThread().getName()));
         final String stdout = SimpleExecutor.execute(workingDir, environmentVariables, exePath, args);
-        logger.info(String.format("******************* call(): SimpleExecutor.execute returned"));
         readyDao.setReady(true);
         return stdout;
     }
