@@ -42,8 +42,6 @@ public class DetectServiceHandler {
 
     public ResponseEntity<String> scanImage(final String scheme, final String host, final int port, final String requestUri, final String tarFilePath, final String hubProjectName, final String hubProjectVersion,
             final String codeLocationPrefix, final boolean cleanupWorkingDir) {
-        logger.info(String.format("hubProjectName: %s", hubProjectName));
-        logger.info(String.format("hubProjectVersion: %s", hubProjectVersion));
         try {
             final String bdio = imageInspectorAction.scanImage(tarFilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir);
             return responseFactory.createResponseAccepted(bdio);

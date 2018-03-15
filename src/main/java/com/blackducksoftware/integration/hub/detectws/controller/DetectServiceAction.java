@@ -26,6 +26,7 @@ package com.blackducksoftware.integration.hub.detectws.controller;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -84,12 +85,12 @@ public class DetectServiceAction {
         final long timestamp = new Date().getTime();
         final String outputFilePath = String.format("%s/run_%d", OUTPUT_DIR_PATH, timestamp);
 
-        final List<String> detectCmdArgs = Arrays.asList("--blackduck.hub.url=https://int-hub04.dc1.lan", "--blackduck.hub.username=sysadmin", "--blackduck.hub.password=blackduck",
+        final List<String> detectCmdArgs = new ArrayList<>(Arrays.asList("--blackduck.hub.url=https://int-hub04.dc1.lan", "--blackduck.hub.username=sysadmin", "--blackduck.hub.password=blackduck",
                 String.format("--detect.hub.signature.scanner.paths=%s", dockerTarfilePath),
                 "--blackduck.hub.trust.cert=true", "--detect.excluded.bom.tool.types=GRADLE",
                 String.format("--detect.output.path=%s", outputFilePath),
                 "--logging.level.com.blackducksoftware.integration=DEBUG",
-                String.format("--detect.source.path=%s", SRC_DIR_PATH));
+                String.format("--detect.source.path=%s", SRC_DIR_PATH)));
         if (StringUtils.isNotBlank(hubProjectName)) {
             detectCmdArgs.add(String.format("--detect.project.name=%s", hubProjectName));
         }

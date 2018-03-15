@@ -54,7 +54,7 @@ public class Executable {
     }
 
     public ProcessBuilder createProcessBuilder() {
-        logger.info("******************* createProcessBuilder()");
+        logger.info("createProcessBuilder()");
         final List<String> processBuilderArguments = createProcessBuilderArguments();
         final ProcessBuilder processBuilder = new ProcessBuilder(processBuilderArguments);
         processBuilder.directory(workingDirectory);

@@ -25,6 +25,8 @@ package com.blackducksoftware.integration.hub.detectws.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,7 +36,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class DetectServiceController {
-    // Endpoint
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    // Endpoints
     private static final String SCAN_INSPECT_IMAGE = "/scaninspectimage";
     private static final String READY_TO_SCANINSPECT = "/ready";
     // Mandatory query param
@@ -53,6 +56,7 @@ public class DetectServiceController {
             @RequestParam(value = HUB_PROJECT_NAME_QUERY_PARAM, defaultValue = "") final String hubProjectName, @RequestParam(value = HUB_PROJECT_VERSION_QUERY_PARAM, defaultValue = "") final String hubProjectVersion,
             @RequestParam(value = CODELOCATION_PREFIX_QUERY_PARAM, defaultValue = "") final String codeLocationPrefix,
             @RequestParam(value = CLEANUP_WORKING_DIR_QUERY_PARAM, required = false, defaultValue = "true") final boolean cleanupWorkingDir) {
+        logger.info(String.format("Endpoint %s called; hubProjectName=%s, hubProjectVersion=%s; codeLocationPrefix=%s; cleanupWorkingDir=%b", SCAN_INSPECT_IMAGE, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir));
         return imageInspectorHandler.scanImage(request.getScheme(), request.getServerName(), request.getServerPort(), request.getRequestURI(), tarFilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir);
     }
 
