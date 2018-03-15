@@ -89,7 +89,6 @@ The script will start a containerized web service running on port 8080. It expos
 ## Other Endpoints ##
 
 ```
-GET /ready # if ready to receive a request, returns 200. Otherwise 503
 GET /trace # get history of http requests
 GET /health # check the health of the service
 GET /metrics # get Spring Boot-generated metrics in JSON format
