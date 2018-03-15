@@ -50,20 +50,20 @@ You only need files in the src/main/resources directory (and images that they do
 
 ## Usage ##
 
-This application can only handle one /scaninspectimage request at a time. Before you call /scaninspectimage, call /ready and make sure you get HTTP status 200 (indicating that the service is ready for another /scaninspectimage request.
+This application can only handle one /scaninspectimage request at a time. Before you call /scaninspectimage, call /ready and make sure you get HTTP status 200 (indicating that the service is ready for another /scaninspectimage request). An HTTP status of 503 indicates that the service is busy processing a request.
 
 /scaninspectimage (when successful) will return HTTP status 202, indicating that the request was accepted. Sometime later detect will finish and upload the results to the Hub in the given Hub project name/version.
 
-## Hub Detect Service Endpoint ##
+## Primary Endpoints ##
 
 GET /ready # Make sure this endpoint returns 200 before calling /scaninspectimage
 POST /scaninspectimage
 * Mandatory query param: tarfile=`<path to Docker image tarfile>`
 * Optional query params (not working yet):
-..* hubprojectname=`<Hub project name>`
-..* hubprojectversion=`<Hub project version>`
-..* codelocationprefix=`<Hub CodeLocation name prefix>` # currently ignored
-..* cleanup=`<cleanup working dirs when done: true or false; default: true>` # currently ignored
+*   hubprojectname=`<Hub project name>`
+*   hubprojectversion=`<Hub project version>`
+*   codelocationprefix=`<Hub CodeLocation name prefix>` # currently ignored
+*   cleanup=`<cleanup working dirs when done: true or false; default: true>` # currently ignored
 
 ## Trying hub-detect-ws in a Kubernetes (minikube) environment ##
 
@@ -86,7 +86,7 @@ Requirements: bash, docker, java 8, curl, port 8080, and a /tmp dir.
 
 The script will start a containerized web service running on port 8080. It exposes a "scaninspectimage" endpoint that takes a path to a Docker image tarfile (the output of a "docker save" command), and returns HTTP status 200 if the request is succesfully received. (Once implemented:) At that point the service will start scanning and inspecting the image. Eventually it will upload the resulting BDIO files to the Hub.
 
-## Other ImageInspector Service Endpoints ##
+## Other Endpoints ##
 
 ```
 GET /ready # if ready to receive a request, returns 200. Otherwise 503
