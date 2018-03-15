@@ -147,11 +147,35 @@ public class InMinikubeTest {
 
     @Test
     public void test() throws InterruptedException, IntegrationException, IOException {
-        final String getBdioOutputJoined = execCmd(String.format("curl -X POST -i http://%s:%s/scaninspectimage?tarfile=/opt/blackduck/hub-detect-ws/target/alpine.tar", clusterIp, PORT), 30);
-        System.out.printf("getBdioOutputJoined: %s", getBdioOutputJoined);
-        assertTrue(getBdioOutputJoined.contains("HTTP/1.1 202"));
-        assertTrue(getBdioOutputJoined.contains("scan/inspect image acceptance mocked"));
+        final String readyResponse = execCmd(String.format("curl -X GET -i http://%s:%s/ready", clusterIp, PORT), 30);
+        System.out.printf("readyResponse: %s", readyResponse);
+        assertTrue(readyResponse.startsWith("HTTP/1.1 200"));
+        String scanResponse = execCmd(String.format("curl -X POST -i http://%s:%s/scaninspectimage?tarfile=/opt/blackduck/hub-detect-ws/target/alpine.tar", clusterIp, PORT), 30);
+        System.out.printf("scanResponse: %s", scanResponse);
+        assertTrue(scanResponse.startsWith("HTTP/1.1 202"));
+        waitForServiceReady();
+        scanResponse = execCmd(String.format("curl -X POST -i http://%s:%s/scaninspectimage?tarfile=/opt/blackduck/hub-detect-ws/target/alpine.tar", clusterIp, PORT), 30);
+        System.out.printf("scanResponse: %s", scanResponse);
+        assertTrue(scanResponse.startsWith("HTTP/1.1 202"));
+        waitForServiceReady();
+    }
 
+    private void waitForServiceReady() throws IOException, InterruptedException, IntegrationException {
+        String readyResponse;
+        boolean serviceReady = false;
+        final int maxTries = 20;
+        for (int i = 0; i < maxTries && !serviceReady; i++) {
+            System.out.printf("Checking ready status; attempt %d of %d\n", i, maxTries);
+            readyResponse = execCmd(String.format("curl -X GET -i http://%s:%s/ready", clusterIp, PORT), 30);
+            System.out.printf("readyResponse: %s\n", readyResponse);
+            if (readyResponse.startsWith("HTTP/1.1 200")) {
+                serviceReady = true;
+                break;
+            }
+            System.out.println("Sleeping for 5 seconds");
+            Thread.sleep(10000L);
+        }
+        assertTrue(serviceReady);
     }
 
     private static String execCmd(final String cmd, final long timeout) throws IOException, InterruptedException, IntegrationException {

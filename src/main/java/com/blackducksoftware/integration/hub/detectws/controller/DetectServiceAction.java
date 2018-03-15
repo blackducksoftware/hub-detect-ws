@@ -71,7 +71,7 @@ public class DetectServiceAction {
         final File pgmDir = new File(PGM_DIR);
         downloadDetect(pgmDir);
         launchDetectAsync(pgmDir, dockerTarfilePath, hubProjectName, hubProjectVersion);
-        return "scan/inspect image acceptance mocked";
+        return "scan/inspect image request accepted";
     }
 
     public boolean ready() {
