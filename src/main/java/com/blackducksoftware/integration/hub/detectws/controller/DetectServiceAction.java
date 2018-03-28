@@ -82,15 +82,29 @@ public class DetectServiceAction {
     private void launchDetectAsync(final File pgmDir, final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion) throws IOException {
         // TODO add support for project name/version with spaces
         readyDao.setReady(false);
-        final long timestamp = new Date().getTime();
-        final String outputFilePath = String.format("%s/run_%d", OUTPUT_DIR_PATH, timestamp);
+        // TODO output dir should get cleaned up later somehow
+        final String outputFilePath = String.format("%s/run_%d_%d", OUTPUT_DIR_PATH, new Date().getTime(), (int) (Math.random() * 10000));
+        final List<String> detectCmdArgs = new ArrayList<>();
+        // TODO un-hardcode
+        detectCmdArgs.add(String.format("--blackduck.hub.url=%s", "https://int-hub04.dc1.lan"));
+        detectCmdArgs.add(String.format("--blackduck.hub.username=%s", "sysadmin"));
+        detectCmdArgs.add(String.format("--blackduck.hub.password=%s", "blackduck"));
+        detectCmdArgs.add(String.format("--blackduck.hub.trust.cert=%b", true));
+        detectCmdArgs.add(String.format("--logging.level.com.blackducksoftware.integration=%s", "DEBUG"));
+        detectCmdArgs.add(String.format("--detect.docker.tar=%s", dockerTarfilePath));
 
-        final List<String> detectCmdArgs = new ArrayList<>(Arrays.asList("--blackduck.hub.url=https://int-hub04.dc1.lan", "--blackduck.hub.username=sysadmin", "--blackduck.hub.password=blackduck",
-                String.format("--detect.hub.signature.scanner.paths=%s", dockerTarfilePath),
-                "--blackduck.hub.trust.cert=true", "--detect.excluded.bom.tool.types=GRADLE",
-                String.format("--detect.output.path=%s", outputFilePath),
-                "--logging.level.com.blackducksoftware.integration=DEBUG",
-                String.format("--detect.source.path=%s", SRC_DIR_PATH)));
+        // TODO TEMP
+        detectCmdArgs.add(String.format("--detect.excluded.bom.tool.types=%s", "GRADLE"));
+        detectCmdArgs.add(String.format("--detect.source.path=%s", "nonexistentsourcedir"));
+
+        detectCmdArgs.add(String.format("--detect.docker.passthrough.imageinspector.url=%s", "http://192.168.99.100:8080"));
+        detectCmdArgs.add(String.format("--detect.docker.passthrough.shared.dir.path.imageinspector=%s", "/opt/blackduck/hub-imageinspector-ws/shared"));
+        detectCmdArgs.add(String.format("--detect.docker.passthrough.shared.dir.path.local=%s", "/Users/billings/tmp/shared"));
+        detectCmdArgs.add(String.format("--detect.cleanup.bom.tool.files=%b", false));
+
+        detectCmdArgs.add(String.format("--detect.output.path=%s", outputFilePath));
+
+        detectCmdArgs.add(String.format("--detect.source.path=%s", SRC_DIR_PATH));
         if (StringUtils.isNotBlank(hubProjectName)) {
             detectCmdArgs.add(String.format("--detect.project.name=%s", hubProjectName));
         }
