@@ -103,6 +103,9 @@ public class DetectServiceAction {
 
         detectCmdArgs.add(String.format("--detect.output.path=%s", outputFilePath));
 
+        // TODO This did not help
+        // detectCmdArgs.add(String.format("--detect.hub.signature.scanner.memory=%d", 1024));
+
         detectCmdArgs.add(String.format("--detect.source.path=%s", SRC_DIR_PATH));
         if (StringUtils.isNotBlank(hubProjectName)) {
             detectCmdArgs.add(String.format("--detect.project.name=%s", hubProjectName));

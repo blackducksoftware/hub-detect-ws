@@ -28,7 +28,9 @@ spec:
             path: /health
             port: 8083
           initialDelaySeconds: 120
-          periodSeconds: 480
+          periodSeconds: 960
+          timeoutSeconds: 480
+          failureThreshold: 5
       volumes:
       - name: detect-target-dir
         hostPath:
