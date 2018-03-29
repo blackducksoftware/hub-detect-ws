@@ -97,8 +97,8 @@ public class DetectServiceAction {
         detectCmdArgs.add(String.format("--detect.excluded.bom.tool.types=%s", "GRADLE"));
 
         detectCmdArgs.add(String.format("--detect.docker.passthrough.imageinspector.url=%s", "http://192.168.99.100:8080"));
-        detectCmdArgs.add(String.format("--detect.docker.passthrough.shared.dir.path.imageinspector=%s", "/opt/blackduck/hub-imageinspector-ws/shared"));
-        detectCmdArgs.add(String.format("--detect.docker.passthrough.shared.dir.path.local=%s", "/Users/billings/tmp/shared"));
+        detectCmdArgs.add(String.format("--detect.docker.passthrough.shared.dir.path.imageinspector=%s", "/opt/blackduck/shared"));
+        detectCmdArgs.add(String.format("--detect.docker.passthrough.shared.dir.path.local=%s", "/opt/blackduck/shared"));
         detectCmdArgs.add(String.format("--detect.cleanup.bom.tool.files=%b", false));
 
         detectCmdArgs.add(String.format("--detect.output.path=%s", outputFilePath));

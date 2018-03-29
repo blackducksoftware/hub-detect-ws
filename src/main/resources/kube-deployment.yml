@@ -19,7 +19,7 @@ spec:
         image: blackducksoftware/hub-detect-ws:0.1.0-SNAPSHOT
         volumeMounts:
         - name: detect-target-dir
-          mountPath: /opt/blackduck/hub-detect-ws/target
+          mountPath: /opt/blackduck/shared
         ports:
         - containerPort: 8080
           hostPort: 8083
@@ -28,9 +28,9 @@ spec:
             path: /health
             port: 8083
           initialDelaySeconds: 120
-          periodSeconds: 120
+          periodSeconds: 480
       volumes:
       - name: detect-target-dir
         hostPath:
-          path: /Users/billings/tmp/shared/target
+          path: /Users/billings/tmp/shared
           type: Directory
