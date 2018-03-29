@@ -22,15 +22,15 @@ spec:
           mountPath: /opt/blackduck/hub-detect-ws/target
         ports:
         - containerPort: 8080
-          hostPort: 8080
+          hostPort: 8083
         livenessProbe:
           httpGet:
             path: /health
-            port: 8080
+            port: 8083
           initialDelaySeconds: 120
-          periodSeconds: 30
+          periodSeconds: 120
       volumes:
       - name: detect-target-dir
         hostPath:
-          path: /Users/billings/tmp/target
+          path: /Users/billings/tmp/shared/target
           type: Directory

@@ -88,7 +88,7 @@ echo "To use service to get BDIO for alpine"
 echo "--------------------------------------------------------------"
 clusterIp=$(minikube ip)
 ##servicePort=$(kubectl describe services hub-detect-ws|grep -v '^Type:'|grep NodePort|awk '{print $3}'|sed 's/\/TCP//')
-servicePort=8080
+servicePort=8083
 cmd="curl -X POST -i http://${clusterIp}:${servicePort}/scaninspectimage?tarfile=/opt/blackduck/hub-detect-ws/target/alpine.tar"
 echo "${cmd}"
 ######$cmd

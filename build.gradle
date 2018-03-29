@@ -94,6 +94,11 @@ task createDockerfile(type: Dockerfile) {
             
             addFile("${appName}-${version}.jar", "${imagePgmDir}/${appName}.jar")
             runCommand "chown -R 10001 ${imagePgmDir}"
+            /////// TODO TEMP to work around detect's "docker executable" requirement
+            runCommand "touch /usr/local/bin/docker; chmod a+rx /usr/local/bin/docker"
+            /////// TODO TEMP force snapshot DI version
+            environmentVariable 'DETECT_DOCKER_PASSTHROUGH_DOCKER_INSPECTOR_VERSION', '5.0.0-SNAPSHOT'
+            /////// END TEMP //////////////////
             user '10001'
             entryPoint "java", "-jar", "${imagePgmDir}/${appName}.jar", "--server.port=8080"
 }
