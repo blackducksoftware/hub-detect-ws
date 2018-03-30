@@ -103,6 +103,8 @@ public class DetectServiceAction {
 
         detectCmdArgs.add(String.format("--detect.output.path=%s", outputFilePath));
 
+        detectCmdArgs.add(String.format("--detect.docker.passthrough.on.host=%b", false));
+
         // TODO This did not help
         // detectCmdArgs.add(String.format("--detect.hub.signature.scanner.memory=%d", 1024));
 
