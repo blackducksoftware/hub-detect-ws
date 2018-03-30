@@ -106,7 +106,7 @@ public class DetectServiceAction {
         detectCmdArgs.add(String.format("--detect.docker.passthrough.on.host=%b", false));
 
         // TODO This did not help
-        // detectCmdArgs.add(String.format("--detect.hub.signature.scanner.memory=%d", 1024));
+        detectCmdArgs.add(String.format("--detect.hub.signature.scanner.memory=%d", 1024));
 
         detectCmdArgs.add(String.format("--detect.source.path=%s", SRC_DIR_PATH));
         if (StringUtils.isNotBlank(hubProjectName)) {
@@ -115,10 +115,12 @@ public class DetectServiceAction {
         if (StringUtils.isNotBlank(hubProjectName)) {
             detectCmdArgs.add(String.format("--detect.project.version.name=%s", hubProjectVersion));
         }
+        final Map<String, String> env = new HashMap<>();
+        env.put("DETECT_JAVA_OPTS", "-Xmx1G");
 
         logger.info("Launching detect");
         final AsyncCmdExecutor executor = new AsyncCmdExecutor(readyDao, pgmDir,
-                null,
+                env,
                 DETECT_EXE_PATH, detectCmdArgs);
         final ExecutorService executorService = Executors.newSingleThreadExecutor();
         // final Future<String> containerCleanerFuture =
