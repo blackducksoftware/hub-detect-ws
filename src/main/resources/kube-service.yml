@@ -6,7 +6,8 @@ metadata:
     app: hub-detect-ws
 spec:
   ports:
-  - port: 8080
+  - port: 8083
+    targetPort: 8083
     protocol: TCP
   selector:
     app: hub-detect-ws

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-targetImageDir=~/tmp/target
+targetImageDir=~/tmp/shared/target
 
 deploymentName=hub-detect-ws
 serviceName=hub-detect-ws
@@ -71,17 +71,18 @@ mkdir -p ${targetImageDir}
 #chmod a+r "${targetImageDir}/debian.tar"
 
 echo "--------------------------------------------------------------"
+echo "Creating service"
+echo "--------------------------------------------------------------"
+kubectl create -f src/main/resources/kube-service.yml
+echo "Pausing to give the hub-detect-ws service time to start..."
+sleep 10
+
+echo "--------------------------------------------------------------"
 echo "Creating deployment"
 echo "--------------------------------------------------------------"
 kubectl create -f src/main/resources/kube-deployment.yml
 waitForPodToStart ${deploymentName}
 
-echo "--------------------------------------------------------------"
-echo "Creating service"
-echo "--------------------------------------------------------------"
-kubectl create -f src/main/resources/kube-service.yml
-echo "Pausing to give the new service time to start..."
-sleep 10
 
 echo "--------------------------------------------------------------"
 echo "To use service to get BDIO for alpine"

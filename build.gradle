@@ -82,7 +82,7 @@ task createDockerfile(type: Dockerfile) {
             println "destFile: ${destFile}"
             from 'ubuntu:16.04'
             maintainer 'Synosys Software Integrity Group'
-            exposePort 8080
+            exposePort 8083
             // TODO remove: runCommand 'apk update && apk add bash && apk add openjdk8-jre && apk add curl && apk add file'
             runCommand 'apt-get update -y && \
                 apt install -y openjdk-8-jdk vim curl && \
@@ -100,7 +100,7 @@ task createDockerfile(type: Dockerfile) {
             environmentVariable 'DETECT_DOCKER_PASSTHROUGH_DOCKER_INSPECTOR_VERSION', '5.0.0-SNAPSHOT'
             /////// END TEMP //////////////////
             user '10001'
-            entryPoint "java", "-jar", "${imagePgmDir}/${appName}.jar", "--server.port=8080"
+            entryPoint "java", "-jar", "${imagePgmDir}/${appName}.jar", "--server.port=8083"
 }
 
 
