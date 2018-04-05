@@ -2,7 +2,7 @@
 
 targetImageDir=~/tmp/shared/target
 
-deploymentName=hub-detect-ws
+podName=hub-detect-ws
 serviceName=hub-detect-ws
 
 function ensureKubeRunning() {
@@ -17,12 +17,12 @@ function ensureKubeRunning() {
 }
 
 function waitForPodToStart() {
-	newContainerName=$1
+	requestedPodName=$1
 	newPodName=""
 	
-	echo "Pausing to give the new pod for ${newContainerName} time to start..."
+	echo "Pausing to give the new pod for ${requestedPodName} time to start..."
 	sleep 15
-	newPodName=$(kubectl get pods | grep "${newContainerName}"  | tr -s " " | cut -d' ' -f1)
+	newPodName=$(kubectl get pods | grep "${requestedPodName}"  | tr -s " " | cut -d' ' -f1)
 	echo "newPodName: ${newPodName}"
 
 	podIsRunning=false
@@ -30,10 +30,10 @@ function waitForPodToStart() {
 	while [[ $counter -lt 10 ]]; do
 		echo the counter is $counter
 		kubectl get pods
-		newPodStatus=$(kubectl get pods | grep "${newContainerName}"  | tr -s " " | cut -d' ' -f3)
+		newPodStatus=$(kubectl get pods | grep "${requestedPodName}"  | tr -s " " | cut -d' ' -f3)
 		echo "newPodStatus: ${newPodStatus}"
 		if [ "${newPodStatus}" == "Running" ]; then
-			echo "The new pod running container ${newContainerName} is ready"
+			echo "The new pod running container ${requestedPodName} is ready"
 			break
 		else
 			echo "The new pod is NOT ready"
@@ -43,10 +43,10 @@ function waitForPodToStart() {
 		counter=$((counter+1))
 	done
 	if [ "${newPodStatus}" != "Running" ]; then
-		echo "The new pod for container ${newContainerName} never started!"
+		echo "The new pod for container ${requestedPodName} never started!"
 		exit -1
 	fi
-	echo "New Pod ${newPodName}, is running container ${newContainerName}"
+	echo "New Pod ${newPodName}, is running container ${requestedPodName}"
 }
 
 ensureKubeRunning
@@ -78,10 +78,10 @@ echo "Pausing to give the hub-detect-ws service time to start..."
 sleep 10
 
 echo "--------------------------------------------------------------"
-echo "Creating deployment"
+echo "Creating pod"
 echo "--------------------------------------------------------------"
-kubectl create -f src/main/resources/kube-deployment.yml
-waitForPodToStart ${deploymentName}
+kubectl create -f src/main/resources/kube-pod.yml
+waitForPodToStart ${podName}
 
 
 echo "--------------------------------------------------------------"
