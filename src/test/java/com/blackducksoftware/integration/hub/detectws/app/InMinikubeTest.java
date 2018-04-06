@@ -69,18 +69,19 @@ public class InMinikubeTest {
             }
         }
 
-        execCmd("mkdir -p build/test/target", 5);
+        execCmd("mkdir -p build/test/shared", 5);
+        execCmd("mkdir -p build/test/shared/target", 5);
         execCmd("docker pull alpine:latest", 120, dockerEnv);
-        execCmd("docker save -o build/test/target/alpine.tar alpine:latest", 20, dockerEnv);
-        execCmd("chmod a+r build/test/target/alpine.tar", 5);
+        execCmd("docker save -o build/test/shared/target/alpine.tar alpine:latest", 20, dockerEnv);
+        execCmd("chmod a+r build/test/shared/target/alpine.tar", 5);
 
-        // execCmd("docker pull debian:latest", 120, dockerEnv);
-        // execCmd("docker save -o build/test/target/debian.tar debian:latest", 20, dockerEnv);
-        // execCmd("chmod a+r build/test/target/debian.tar", 5);
-        //
-        // execCmd("docker pull fedora:latest", 120, dockerEnv);
-        // execCmd("docker save -o build/test/target/fedora.tar fedora:latest", 20, dockerEnv);
-        // execCmd("chmod a+r build/test/target/fedora.tar", 5);
+        execCmd("docker pull debian:latest", 120, dockerEnv);
+        execCmd("docker save -o build/test/shared/target/debian.tar debian:latest", 20, dockerEnv);
+        execCmd("chmod a+r build/test/shared/target/debian.tar", 5);
+
+        execCmd("docker pull fedora:latest", 120, dockerEnv);
+        execCmd("docker save -o build/test/shared/target/fedora.tar fedora:latest", 20, dockerEnv);
+        execCmd("chmod a+r build/test/shared/target/fedora.tar", 5);
 
         // client.load(InMinikubeTest.class.getResourceAsStream("/kube-namespace.yml")).createOrReplace();
         final ObjectMeta namespaceMetadata = new ObjectMetaBuilder().withName(NAME_SPACE).build();
@@ -168,11 +169,11 @@ public class InMinikubeTest {
         final String readyResponse = execCmd(String.format("curl -X GET -i http://%s:%s/ready", clusterIp, PORT), 30);
         System.out.printf("readyResponse: %s", readyResponse);
         assertTrue(readyResponse.startsWith("HTTP/1.1 200"));
-        String scanResponse = execCmd(String.format("curl -X POST -i http://%s:%s/scaninspectimage?tarfile=/opt/blackduck/hub-detect-ws/target/alpine.tar", clusterIp, PORT), 30);
+        String scanResponse = execCmd(String.format("curl -X POST -i http://%s:%s/scaninspectimage?tarfile=/opt/blackduck/shared/target/alpine.tar", clusterIp, PORT), 30);
         System.out.printf("scanResponse: %s", scanResponse);
         assertTrue(scanResponse.startsWith("HTTP/1.1 202"));
         waitForServiceReady();
-        scanResponse = execCmd(String.format("curl -X POST -i http://%s:%s/scaninspectimage?tarfile=/opt/blackduck/hub-detect-ws/target/alpine.tar", clusterIp, PORT), 30);
+        scanResponse = execCmd(String.format("curl -X POST -i http://%s:%s/scaninspectimage?tarfile=/opt/blackduck/shared/target/alpine.tar", clusterIp, PORT), 30);
         System.out.printf("scanResponse: %s", scanResponse);
         assertTrue(scanResponse.startsWith("HTTP/1.1 202"));
         waitForServiceReady();
