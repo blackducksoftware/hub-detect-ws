@@ -36,7 +36,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 @Category(IntegrationTest.class)
 public class InMinikubeTest {
     private static final String POD_NAME = "hub-detect-ws";
-    private static final String NAME_SPACE = POD_NAME;
+    private static final String NAME_SPACE = "integration-test";
     private static final String PORT = "8083";
     private static KubernetesClient client;
     private static String clusterIp;
@@ -83,22 +83,25 @@ public class InMinikubeTest {
         // execCmd("chmod a+r build/test/target/fedora.tar", 5);
 
         // client.load(InMinikubeTest.class.getResourceAsStream("/kube-namespace.yml")).createOrReplace();
-        final ObjectMeta namespaceMetadata = new ObjectMetaBuilder().withName("hub-detect-ws").build();
+        final ObjectMeta namespaceMetadata = new ObjectMetaBuilder().withName(NAME_SPACE).build();
         final Namespace namespace = new NamespaceBuilder().withApiVersion("v1").withMetadata(namespaceMetadata).build();
         client.namespaces().create(namespace);
         Thread.sleep(5000L);
 
-        InputStream configInputStream = InMinikubeTest.class.getResourceAsStream("kube-test-pod.yml");
-        if (configInputStream == null) {
-            final File configFile = new File("build/classes/java/test/com/blackducksoftware/integration/hub/detectws/app/kube-test-pod.yml");
-            assertTrue("Unable to find pod config file", configFile.exists());
-            configInputStream = new FileInputStream(configFile);
-        }
-        assertNotNull("Unable to load pod config file", configInputStream);
-        client.load(configInputStream).inNamespace(NAME_SPACE).createOrReplace();
-        Thread.sleep(10000L);
-        client.load(InMinikubeTest.class.getResourceAsStream("/kube-service.yml")).inNamespace(NAME_SPACE).createOrReplace();
+        final File serviceConfigFile = new File("src/test/resources/kube-test-service.yml");
+        assertTrue("Unable to find service config file", serviceConfigFile.exists());
+        final InputStream serviceConfigInputStream = new FileInputStream(serviceConfigFile);
+        assertNotNull("Unable to load service config file", serviceConfigInputStream);
+
+        final File podConfigFile = new File("build/classes/java/test/com/blackducksoftware/integration/hub/detectws/app/kube-test-pod.yml");
+        assertTrue("Unable to find pod config file", podConfigFile.exists());
+        final InputStream podConfigInputStream = new FileInputStream(podConfigFile);
+        assertNotNull("Unable to load pod config file", podConfigInputStream);
+
+        client.load(serviceConfigInputStream).inNamespace(NAME_SPACE).createOrReplace();
         Thread.sleep(5000L);
+        client.load(podConfigInputStream).inNamespace(NAME_SPACE).createOrReplace();
+        Thread.sleep(10000L);
 
         final PodList podList = client.pods().inNamespace(NAME_SPACE).list();
         final String podListString = podList.getItems().stream().map(pod -> pod.getMetadata().getName()).collect(Collectors.joining("\n"));

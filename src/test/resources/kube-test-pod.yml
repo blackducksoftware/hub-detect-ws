@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: hub-detect-ws
-  namespace: hub-detect-ws
+  namespace: integration-test
   labels:
     app: hub-detect-ws
 spec:
