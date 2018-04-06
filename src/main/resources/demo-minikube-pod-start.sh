@@ -3,15 +3,21 @@
 targetImageDir=~/tmp/shared/target
 
 podName=hub-detect-ws
-serviceName=hub-detect-ws
+serviceName=${podName}
+nameSpace=${podName}
+minikubeMemory=7000
 
 function ensureKubeRunning() {
+
 	kubeRunning=$(minikube status | grep "minikube: Running" | wc -l)
 	if [[ ${kubeRunning} -eq 0 ]]; then
 		echo "Starting minikube"
-		minikube start
+		minikube start --memory ${minikubeMemory}
 	else
+		echo "--------------------------------------------------------------------"
 		echo "minikube is already running"
+		echo "Remember, minikube should be started with --memory ${minikubeMemory} (or more)"
+		echo "--------------------------------------------------------------------"
 	fi
 	eval $(minikube docker-env)
 }
@@ -22,15 +28,15 @@ function waitForPodToStart() {
 	
 	echo "Pausing to give the new pod for ${requestedPodName} time to start..."
 	sleep 15
-	newPodName=$(kubectl get pods | grep "${requestedPodName}"  | tr -s " " | cut -d' ' -f1)
+	newPodName=$(kubectl get pods --namespace ${nameSpace} | grep "${requestedPodName}"  | tr -s " " | cut -d' ' -f1)
 	echo "newPodName: ${newPodName}"
 
 	podIsRunning=false
 	counter=0
 	while [[ $counter -lt 10 ]]; do
 		echo the counter is $counter
-		kubectl get pods
-		newPodStatus=$(kubectl get pods | grep "${requestedPodName}"  | tr -s " " | cut -d' ' -f3)
+		kubectl get pods --namespace ${nameSpace}
+		newPodStatus=$(kubectl get pods --namespace ${nameSpace} | grep "${requestedPodName}"  | tr -s " " | cut -d' ' -f3)
 		echo "newPodStatus: ${newPodStatus}"
 		if [ "${newPodStatus}" == "Running" ]; then
 			echo "The new pod running container ${requestedPodName} is ready"
@@ -71,6 +77,13 @@ mkdir -p ${targetImageDir}
 #chmod a+r "${targetImageDir}/debian.tar"
 
 echo "--------------------------------------------------------------"
+echo "Creating namespace"
+echo "--------------------------------------------------------------"
+kubectl create -f src/main/resources/kube-namespace.yml
+sleep 1
+
+
+echo "--------------------------------------------------------------"
 echo "Creating service"
 echo "--------------------------------------------------------------"
 kubectl create -f src/main/resources/kube-service.yml
@@ -88,7 +101,7 @@ echo "--------------------------------------------------------------"
 echo "To use service to get BDIO for alpine"
 echo "--------------------------------------------------------------"
 clusterIp=$(minikube ip)
-##servicePort=$(kubectl describe services hub-detect-ws|grep -v '^Type:'|grep NodePort|awk '{print $3}'|sed 's/\/TCP//')
+##servicePort=$(kubectl describe services hub-detect-ws --namespace ${nameSpace}|grep -v '^Type:'|grep NodePort|awk '{print $3}'|sed 's/\/TCP//')
 servicePort=8083
 cmd="curl -X POST -i http://${clusterIp}:${servicePort}/scaninspectimage?tarfile=/opt/blackduck/shared/target/alpine.tar"
 echo "${cmd}"

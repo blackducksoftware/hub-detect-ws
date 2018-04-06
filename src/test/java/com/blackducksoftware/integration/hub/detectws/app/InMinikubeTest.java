@@ -23,6 +23,10 @@ import org.junit.experimental.categories.Category;
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.test.annotation.IntegrationTest;
 
+import io.fabric8.kubernetes.api.model.Namespace;
+import io.fabric8.kubernetes.api.model.NamespaceBuilder;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceList;
@@ -32,7 +36,8 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 @Category(IntegrationTest.class)
 public class InMinikubeTest {
     private static final String POD_NAME = "hub-detect-ws";
-    private static final String PORT = "8080";
+    private static final String NAME_SPACE = POD_NAME;
+    private static final String PORT = "8083";
     private static KubernetesClient client;
     private static String clusterIp;
 
@@ -77,6 +82,12 @@ public class InMinikubeTest {
         // execCmd("docker save -o build/test/target/fedora.tar fedora:latest", 20, dockerEnv);
         // execCmd("chmod a+r build/test/target/fedora.tar", 5);
 
+        // client.load(InMinikubeTest.class.getResourceAsStream("/kube-namespace.yml")).createOrReplace();
+        final ObjectMeta namespaceMetadata = new ObjectMetaBuilder().withName("hub-detect-ws").build();
+        final Namespace namespace = new NamespaceBuilder().withApiVersion("v1").withMetadata(namespaceMetadata).build();
+        client.namespaces().create(namespace);
+        Thread.sleep(5000L);
+
         InputStream configInputStream = InMinikubeTest.class.getResourceAsStream("kube-test-pod.yml");
         if (configInputStream == null) {
             final File configFile = new File("build/classes/java/test/com/blackducksoftware/integration/hub/detectws/app/kube-test-pod.yml");
@@ -84,16 +95,16 @@ public class InMinikubeTest {
             configInputStream = new FileInputStream(configFile);
         }
         assertNotNull("Unable to load pod config file", configInputStream);
-        client.load(configInputStream).inNamespace("default").createOrReplace();
+        client.load(configInputStream).inNamespace(NAME_SPACE).createOrReplace();
         Thread.sleep(10000L);
-        client.load(InMinikubeTest.class.getResourceAsStream("/kube-service.yml")).inNamespace("default").createOrReplace();
+        client.load(InMinikubeTest.class.getResourceAsStream("/kube-service.yml")).inNamespace(NAME_SPACE).createOrReplace();
         Thread.sleep(5000L);
 
-        final PodList podList = client.pods().inNamespace("default").list();
+        final PodList podList = client.pods().inNamespace(NAME_SPACE).list();
         final String podListString = podList.getItems().stream().map(pod -> pod.getMetadata().getName()).collect(Collectors.joining("\n"));
         System.out.printf("Pods: %s\n", podListString);
 
-        final ServiceList serviceList = client.services().inNamespace("default").list();
+        final ServiceList serviceList = client.services().inNamespace(NAME_SPACE).list();
         for (final Service service : serviceList.getItems()) {
             System.out.printf("Service: %s; app: %s\n", service.getMetadata().getName(), service.getMetadata().getLabels().get("app"));
         }
@@ -110,11 +121,11 @@ public class InMinikubeTest {
             client.close();
         }
         try {
-            execCmd(String.format("kubectl delete service %s", POD_NAME), 10);
+            execCmd(String.format("kubectl delete service %s --namespace %s", POD_NAME, NAME_SPACE), 10);
         } catch (IOException | InterruptedException | IntegrationException e1) {
         }
         try {
-            execCmd(String.format("kubectl delete pod %s", POD_NAME), 10);
+            execCmd(String.format("kubectl delete pod %s --namespace %s", POD_NAME, NAME_SPACE), 10);
         } catch (IOException | InterruptedException | IntegrationException e1) {
         }
         try {
@@ -124,7 +135,7 @@ public class InMinikubeTest {
         boolean podExited = false;
         for (int i = 0; i < 10; i++) {
             try {
-                execCmd(String.format("kubectl get pod %s", POD_NAME), 10);
+                execCmd(String.format("kubectl get pod %s --namespace %s", POD_NAME, NAME_SPACE), 10);
             } catch (final Exception e) {
                 System.out.println(String.format("kubectl get pod %s failed: %s", POD_NAME, e.getMessage()));
                 if (e.getMessage().contains("NotFound")) {
@@ -141,6 +152,10 @@ public class InMinikubeTest {
         }
         if (!podExited) {
             System.out.println(String.format("Warning: Pod %s has not exited", POD_NAME));
+        }
+        try {
+            execCmd(String.format("kubectl delete namespace %s", NAME_SPACE), 10);
+        } catch (IOException | InterruptedException | IntegrationException e1) {
         }
         System.out.println("Test has completed");
     }
