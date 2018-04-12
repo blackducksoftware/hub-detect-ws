@@ -83,5 +83,5 @@ spec:
   volumes:
   - name: blackduck-shared-dir
     hostPath:
-      path: /Users/billings/tmp/shared
+      path: @WORKINGDIR@/shared
       type: Directory

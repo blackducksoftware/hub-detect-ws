@@ -1,6 +1,8 @@
 #!/bin/bash
 
-targetImageDir=~/tmp/shared/target
+workingDir="${HOME}/hub-detect-ws"
+sharedDir="${workingDir}/shared"
+targetImageDir="${sharedDir}/target"
 
 podName=hub-detect-ws
 serviceName=${podName}
@@ -8,7 +10,6 @@ nameSpace=${podName}
 minikubeMemory=7000
 
 function ensureKubeRunning() {
-
 	kubeRunning=$(minikube status | grep "minikube: Running" | wc -l)
 	if [[ ${kubeRunning} -eq 0 ]]; then
 		echo "Starting minikube"
@@ -55,26 +56,43 @@ function waitForPodToStart() {
 	echo "New Pod ${newPodName}, is running container ${requestedPodName}"
 }
 
+mkdir -p ${targetImageDir}
+
+chmod 777 ${workingDir}
+chmod 777 ${sharedDir}
+chmod 777 ${targetImageDir}
+
 ensureKubeRunning
 mkdir -p ${targetImageDir}
-#rm -f "${targetImageDir}/alpine.tar"
-#rm -f "${targetImageDir}/fedora.tar"
-#rm -f "${targetImageDir}/debian.tar"
+rm -f "${targetImageDir}/alpine.tar"
+rm -f "${targetImageDir}/fedora.tar"
+rm -f "${targetImageDir}/debian.tar"
 
-#echo "--------------------------------------------------------------"
-#echo "Pulling/saving the target images"
-#echo "--------------------------------------------------------------"
-#docker pull "alpine:latest"
-#docker save -o "${targetImageDir}/alpine.tar" "alpine:latest"
-#chmod a+r "${targetImageDir}/alpine.tar"
+echo "--------------------------------------------------------------"
+echo "Pulling/saving the target images"
+echo "--------------------------------------------------------------"
+if [ ! -f "${targetImageDir}/alpine.tar" ] ; then
+	docker pull "alpine:latest"
+	docker save -o "${targetImageDir}/alpine.tar" "alpine:latest"
+	chmod a+r "${targetImageDir}/alpine.tar"
+fi
 
-#docker pull "fedora:latest"
-#docker save -o "${targetImageDir}/fedora.tar" "fedora:latest"
-#chmod a+r "${targetImageDir}/fedora.tar"
+if [ ! -f "${targetImageDir}/fedora.tar" ] ; then
+	docker pull "fedora:latest"
+	docker save -o "${targetImageDir}/fedora.tar" "fedora:latest"
+	chmod a+r "${targetImageDir}/fedora.tar"
+fi
 
-#docker pull "debian:latest"
-#docker save -o "${targetImageDir}/debian.tar" "debian:latest"
-#chmod a+r "${targetImageDir}/debian.tar"
+if [ ! -f "${targetImageDir}/debian.tar" ] ; then
+	docker pull "debian:latest"
+	docker save -o "${targetImageDir}/debian.tar" "debian:latest"
+	chmod a+r "${targetImageDir}/debian.tar"
+fi
+
+echo "--------------------------------------------------------------"
+echo "Pre-processing kube yaml file"
+echo "--------------------------------------------------------------"
+sed "s+@WORKINGDIR@+${workingDir}+g" src/main/resources/kube-pod.yml > ${workingDir}/kube-pod.yml
 
 echo "--------------------------------------------------------------"
 echo "Creating namespace"
@@ -93,7 +111,7 @@ sleep 10
 echo "--------------------------------------------------------------"
 echo "Creating pod"
 echo "--------------------------------------------------------------"
-kubectl create -f src/main/resources/kube-pod.yml
+kubectl create -f ${workingDir}/kube-pod.yml
 waitForPodToStart ${podName}
 
 
