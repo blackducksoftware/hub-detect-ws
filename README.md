@@ -32,9 +32,12 @@ curl -X GET  -i http://$(minikube ip):8083/ready # wait for a 200 response
 curl -X POST -i http://$(minikube ip):8083/scaninspectimage?tarfile=/opt/blackduck/shared/target/debian.tar
 curl -X GET  -i http://$(minikube ip):8083/ready # wait for a 200 response
 ```
-You should get an HTTP 202 response indicating that the request was accepted. When it's done, a Scan will appear on the Hub's Scans screen. To get the logs:
+You should get an HTTP 202 response indicating that the request was accepted. When it's done, a Scan will appear on the Hub's Scans screen. To get the log:
 ```
 kubectl logs --namespace hub-detect-ws hub-detect-ws -c hub-detect-ws
+```
+To get logs from the supporting services:
+```
 kubectl logs --namespace hub-detect-ws hub-detect-ws -c hub-imageinspector-ws-alpine
 kubectl logs --namespace hub-detect-ws hub-detect-ws -c hub-imageinspector-ws-centos
 kubectl logs --namespace hub-detect-ws hub-detect-ws -c hub-imageinspector-ws-ubuntu
