@@ -18,19 +18,26 @@ You should get an HTTP 202 response indicating that the request was accepted. Wh
 docker logs hub-detect-ws
 ```
 
-# Quick Start in a Minikube Environment #
-Minikube must be running.
+# Quick Start in a Minikube Environment
+Minikube must be running, started with: minikube start --memory 8000. The script will create and use namespace hub-detect-ws, and dir ~/hub-detect-ws.
 
 ```
 git clone https://github.com/blackducksoftware/hub-detect-ws
 cd hub-detect-ws
-src/main/resources/demo-minikube-start.sh
-curl -X POST -i http://$(minikube ip):8080/scaninspectimage?tarfile=/opt/blackduck/hub-detect-ws/target/alpine.tar
+src/main/resources/demo-minikube-pod-start.sh
+curl -X POST -i http://$(minikube ip):8083/scaninspectimage?tarfile=/opt/blackduck/shared/target/alpine.tar
+curl -X GET  -i http://$(minikube ip):8083/ready # wait for a 200 response
+curl -X POST -i http://$(minikube ip):8083/scaninspectimage?tarfile=/opt/blackduck/shared/target/fedora.tar
+curl -X GET  -i http://$(minikube ip):8083/ready # wait for a 200 response
+curl -X POST -i http://$(minikube ip):8083/scaninspectimage?tarfile=/opt/blackduck/shared/target/debian.tar
+curl -X GET  -i http://$(minikube ip):8083/ready # wait for a 200 response
 ```
-You should get an HTTP 202 response indicating that the request was accepted. When it's done, a Scan will appear on the Hub's Scans screen. To get the log:
+You should get an HTTP 202 response indicating that the request was accepted. When it's done, a Scan will appear on the Hub's Scans screen. To get the logs:
 ```
-kubectl get pods # get the pod name (starts with hub-detect-ws)
-kubectl logs <podname> -c hub-detect-ws
+kubectl logs --namespace hub-detect-ws hub-detect-ws -c hub-detect-ws
+kubectl logs --namespace hub-detect-ws hub-detect-ws -c hub-imageinspector-ws-alpine
+kubectl logs --namespace hub-detect-ws hub-detect-ws -c hub-imageinspector-ws-centos
+kubectl logs --namespace hub-detect-ws hub-detect-ws -c hub-imageinspector-ws-ubuntu
 ```
 
 # Build #
