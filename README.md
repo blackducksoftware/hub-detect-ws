@@ -44,6 +44,7 @@ kubectl logs --namespace hub-detect-ws hub-detect-ws -c hub-imageinspector-ws-al
 kubectl logs --namespace hub-detect-ws hub-detect-ws -c hub-imageinspector-ws-centos
 kubectl logs --namespace hub-detect-ws hub-detect-ws -c hub-imageinspector-ws-ubuntu
 ```
+Subsequent runs on the same tarfile will hit a permission error writing the container filesystem output file. Executing "rm -rf ~/hub-detect-ws/shared/output/*.gz" between runs will avoid this.
 
 # Build #
 TBD
