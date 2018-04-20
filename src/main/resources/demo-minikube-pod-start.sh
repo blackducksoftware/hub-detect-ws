@@ -3,11 +3,12 @@
 workingDir="${HOME}/hub-detect-ws"
 sharedDir="${workingDir}/shared"
 targetImageDir="${sharedDir}/target"
+outputDir="${sharedDir}/output"
 
 podName=hub-detect-ws
 serviceName=${podName}
 nameSpace=${podName}
-minikubeMemory=7000
+minikubeMemory=8000
 
 function ensureKubeRunning() {
 	kubeRunning=$(minikube status | grep "minikube: Running" | wc -l)
@@ -28,7 +29,7 @@ function waitForPodToStart() {
 	newPodName=""
 	
 	echo "Pausing to give the new pod for ${requestedPodName} time to start..."
-	sleep 15
+	sleep 20
 	newPodName=$(kubectl get pods --namespace ${nameSpace} | grep "${requestedPodName}"  | tr -s " " | cut -d' ' -f1)
 	echo "newPodName: ${newPodName}"
 
@@ -46,7 +47,7 @@ function waitForPodToStart() {
 			echo "The new pod is NOT ready"
 		fi
 		echo "Pausing to give the new pod time to start..."
-		sleep 10
+		sleep 15
 		counter=$((counter+1))
 	done
 	if [ "${newPodStatus}" != "Running" ]; then
@@ -57,13 +58,14 @@ function waitForPodToStart() {
 }
 
 mkdir -p ${targetImageDir}
+mkdir ${outputDir}
 
 chmod 777 ${workingDir}
 chmod 777 ${sharedDir}
 chmod 777 ${targetImageDir}
+chmod 777 ${outputDir}
 
 ensureKubeRunning
-mkdir -p ${targetImageDir}
 rm -f "${targetImageDir}/alpine.tar"
 rm -f "${targetImageDir}/fedora.tar"
 rm -f "${targetImageDir}/debian.tar"

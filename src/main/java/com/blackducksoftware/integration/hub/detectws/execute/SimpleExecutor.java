@@ -40,7 +40,7 @@ public class SimpleExecutor {
     private static final Logger logger = LoggerFactory.getLogger(SimpleExecutor.class);
 
     public static String execute(final File workingDir, final Map<String, String> environmentVariables, final String exePath, final List<String> args) throws ExecutableRunnerException {
-        logger.info("execute()");
+        logger.trace("execute()");
         final Executable executor = new Executable(workingDir, environmentVariables, exePath, args);
         final ExecutableRunner runner = new ExecutableRunner();
         final ExecutableOutput out = runner.execute(executor);
@@ -50,7 +50,7 @@ public class SimpleExecutor {
         final String argsString = StringUtils.join(args, ' ');
         final String stderrString = StringUtils.join(stderrList, '\n');
         final String stdoutString = StringUtils.join(stdout, '\n');
-        logger.info(String.format("Command: '%s %s'; Output: %s; stderr: %s", exePath, argsString, stdoutString, stderrString));
+        logger.trace(String.format("Command: '%s %s'; Output: %s; stderr: %s", exePath, argsString, stdoutString, stderrString));
         return stdoutString;
     }
 }

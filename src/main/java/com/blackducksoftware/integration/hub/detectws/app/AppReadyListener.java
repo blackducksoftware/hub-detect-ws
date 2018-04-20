@@ -25,8 +25,6 @@ package com.blackducksoftware.integration.hub.detectws.app;
 
 import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -36,7 +34,6 @@ import com.blackducksoftware.integration.hub.detectws.state.ReadyDao;
 
 @Component
 public class AppReadyListener {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     ReadyDao ready;
