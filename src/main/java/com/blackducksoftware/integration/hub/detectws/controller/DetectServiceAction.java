@@ -120,17 +120,17 @@ public class DetectServiceAction {
         // TODO add support for project name/version with spaces
         readyDao.setReady(false);
 
-        logger.info(String.format("*** hubUrl: %s", hubUrl));
-        logger.info(String.format("*** hubUsername: %s", hubUsername));
-        logger.info(String.format("*** hubPassword: %s", hubPassword));
-        logger.info(String.format("*** hubTrustString: %s", hubTrustString));
-        logger.info(String.format("*** loggingLevel: %s", loggingLevel));
-        logger.info(String.format("*** imageInspectorUrl: %s", imageInspectorUrl));
-        logger.info(String.format("*** detectServiceSharedDirPath: %s", detectServiceSharedDirPath));
-        logger.info(String.format("*** imageInspectorServiceSharedDirPath: %s", imageInspectorServiceSharedDirPath));
-        logger.info(String.format("*** detectJavaOpts: %s", detectJavaOpts));
-        logger.info(String.format("*** signatureScannerMemoryString: %s", signatureScannerMemoryString));
-        logger.info(String.format("*** detectCleanupBomToolFilesString: %s", detectCleanupBomToolFilesString));
+        logger.debug(String.format("hubUrl: %s", hubUrl));
+        logger.debug(String.format("hubUsername: %s", hubUsername));
+        logger.debug(String.format("hubPassword: %s", hubPassword));
+        logger.debug(String.format("hubTrustString: %s", hubTrustString));
+        logger.debug(String.format("loggingLevel: %s", loggingLevel));
+        logger.debug(String.format("imageInspectorUrl: %s", imageInspectorUrl));
+        logger.debug(String.format("detectServiceSharedDirPath: %s", detectServiceSharedDirPath));
+        logger.debug(String.format("imageInspectorServiceSharedDirPath: %s", imageInspectorServiceSharedDirPath));
+        logger.debug(String.format("detectJavaOpts: %s", detectJavaOpts));
+        logger.debug(String.format("signatureScannerMemoryString: %s", signatureScannerMemoryString));
+        logger.debug(String.format("detectCleanupBomToolFilesString: %s", detectCleanupBomToolFilesString));
 
         // TODO output dir should get cleaned up later somehow
         final String outputFilePath = String.format("%s/run_%d_%d", OUTPUT_DIR_PATH, new Date().getTime(), (int) (Math.random() * 10000));
@@ -138,14 +138,11 @@ public class DetectServiceAction {
         detectCmdArgs.add(String.format("--blackduck.hub.url=%s", hubUrl));
         detectCmdArgs.add(String.format("--blackduck.hub.username=%s", hubUsername));
         detectCmdArgs.add(String.format("--blackduck.hub.password=%s", hubPassword));
-        // TODO
         detectCmdArgs.add(String.format("--blackduck.hub.trust.cert=%b", hubTrustString.equalsIgnoreCase("true") ? true : false));
-        ///// detectCmdArgs.add(String.format("--blackduck.hub.trust.cert=%b", true));
-        //////
         detectCmdArgs.add(String.format("--logging.level.com.blackducksoftware.integration=%s", loggingLevel));
         detectCmdArgs.add(String.format("--detect.docker.tar=%s", dockerTarfilePath));
 
-        // TODO TEMP
+        // TODO TEMP; when "exclude all" is available: use that
         detectCmdArgs.add(String.format("--detect.excluded.bom.tool.types=%s", "GRADLE"));
 
         detectCmdArgs.add(String.format("--detect.docker.passthrough.imageinspector.url=%s", imageInspectorUrl));
