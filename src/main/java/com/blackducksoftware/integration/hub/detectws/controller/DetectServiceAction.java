@@ -40,6 +40,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
@@ -62,6 +63,9 @@ public class DetectServiceAction {
 
     @Autowired
     ReadyDao readyDao;
+
+    @Value("${hub.url}")
+    private String hubUrlFormatString;
 
     public String scanImage(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir)
             throws IntegrationException, IOException, InterruptedException, ExecutableRunnerException {
@@ -86,7 +90,7 @@ public class DetectServiceAction {
         final String outputFilePath = String.format("%s/run_%d_%d", OUTPUT_DIR_PATH, new Date().getTime(), (int) (Math.random() * 10000));
         final List<String> detectCmdArgs = new ArrayList<>();
         // TODO un-hardcode
-        detectCmdArgs.add(String.format("--blackduck.hub.url=%s", "https://int-hub04.dc1.lan"));
+        detectCmdArgs.add(String.format("--blackduck.hub.url=%s", hubUrl));
         detectCmdArgs.add(String.format("--blackduck.hub.username=%s", "sysadmin"));
         detectCmdArgs.add(String.format("--blackduck.hub.password=%s", "blackduck"));
         detectCmdArgs.add(String.format("--blackduck.hub.trust.cert=%b", true));

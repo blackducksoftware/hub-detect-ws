@@ -8,7 +8,13 @@ metadata:
 spec:
   containers:
   - name: hub-detect-ws
-    image: blackducksoftware/hub-detect-ws:0.1.0-SNAPSHOT
+    image: blackducksoftware/hub-detect-ws:0.2.0-SNAPSHOT
+    env:
+    - name: HUB_URL
+      valueFrom:
+        configMapKeyRef:
+          name: hub-detect-ws
+          key: hub.url
     volumeMounts:
     - name: blackduck-shared-dir
       mountPath: /opt/blackduck/shared
