@@ -51,6 +51,9 @@ import com.blackducksoftware.integration.hub.detectws.state.ReadyDao;
 
 @Component
 public class DetectServiceAction {
+    private static final String FETCH_DETECT_OPTION_SAVE = "-s";
+    private static final String FETCH_DETECT_CMD = "curl";
+    private static final String DETECT_EXE_URL = "https://blackducksoftware.github.io/hub-detect/hub-detect.sh";
     public static final String PGM_DIR = "/opt/blackduck/hub-detect-ws";
     private static final String SRC_DIR_PATH = String.format("%s/source", PGM_DIR);
     private static final String OUTPUT_DIR_PATH = String.format("%s/output", PGM_DIR);
@@ -73,11 +76,29 @@ public class DetectServiceAction {
     @Value("${hub.password}")
     private String hubPassword;
 
-    @Value("${hub.always.trust.cert}")
-    private boolean hubTrustCert;
-
     @Value("${logging.level}")
     private String loggingLevel;
+
+    @Value("${image.inspector.url}")
+    private String imageInspectorUrl;
+
+    @Value("${detect.service.shared.dir.path:/opt/blackduck/shared}")
+    private String detectServiceSharedDirPath;
+
+    @Value("${image.inspector.service.shared.dir.path:/opt/blackduck/shared}")
+    private String imageInspectorServiceSharedDirPath;
+
+    @Value("${detect.java.opts:}")
+    private String detectJavaOpts;
+
+    @Value("${detect.hub.signature.scanner.memory:1024}")
+    private String signatureScannerMemoryString;
+
+    @Value("${detect.cleanup.bom.tool.files}")
+    private String detectCleanupBomToolFilesString;
+
+    @Value("${hub.trust}")
+    private String hubTrustString;
 
     public String scanImage(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir)
             throws IntegrationException, IOException, InterruptedException, ExecutableRunnerException {
@@ -98,31 +119,47 @@ public class DetectServiceAction {
     private void launchDetectAsync(final File pgmDir, final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion) throws IOException {
         // TODO add support for project name/version with spaces
         readyDao.setReady(false);
+
+        logger.info(String.format("*** hubUrl: %s", hubUrl));
+        logger.info(String.format("*** hubUsername: %s", hubUsername));
+        logger.info(String.format("*** hubPassword: %s", hubPassword));
+        logger.info(String.format("*** hubTrustString: %s", hubTrustString));
+        logger.info(String.format("*** loggingLevel: %s", loggingLevel));
+        logger.info(String.format("*** imageInspectorUrl: %s", imageInspectorUrl));
+        logger.info(String.format("*** detectServiceSharedDirPath: %s", detectServiceSharedDirPath));
+        logger.info(String.format("*** imageInspectorServiceSharedDirPath: %s", imageInspectorServiceSharedDirPath));
+        logger.info(String.format("*** detectJavaOpts: %s", detectJavaOpts));
+        logger.info(String.format("*** signatureScannerMemoryString: %s", signatureScannerMemoryString));
+        logger.info(String.format("*** detectCleanupBomToolFilesString: %s", detectCleanupBomToolFilesString));
+
         // TODO output dir should get cleaned up later somehow
         final String outputFilePath = String.format("%s/run_%d_%d", OUTPUT_DIR_PATH, new Date().getTime(), (int) (Math.random() * 10000));
         final List<String> detectCmdArgs = new ArrayList<>();
-        // TODO un-hardcode
         detectCmdArgs.add(String.format("--blackduck.hub.url=%s", hubUrl));
         detectCmdArgs.add(String.format("--blackduck.hub.username=%s", hubUsername));
         detectCmdArgs.add(String.format("--blackduck.hub.password=%s", hubPassword));
-        detectCmdArgs.add(String.format("--blackduck.hub.trust.cert=%b", hubTrustCert));
+        // TODO
+        detectCmdArgs.add(String.format("--blackduck.hub.trust.cert=%b", hubTrustString.equalsIgnoreCase("true") ? true : false));
+        ///// detectCmdArgs.add(String.format("--blackduck.hub.trust.cert=%b", true));
+        //////
         detectCmdArgs.add(String.format("--logging.level.com.blackducksoftware.integration=%s", loggingLevel));
         detectCmdArgs.add(String.format("--detect.docker.tar=%s", dockerTarfilePath));
 
         // TODO TEMP
         detectCmdArgs.add(String.format("--detect.excluded.bom.tool.types=%s", "GRADLE"));
 
-        detectCmdArgs.add(String.format("--detect.docker.passthrough.imageinspector.url=%s", "http://192.168.99.100:8080"));
-        detectCmdArgs.add(String.format("--detect.docker.passthrough.shared.dir.path.imageinspector=%s", "/opt/blackduck/shared"));
-        detectCmdArgs.add(String.format("--detect.docker.passthrough.shared.dir.path.local=%s", "/opt/blackduck/shared"));
-        detectCmdArgs.add(String.format("--detect.cleanup.bom.tool.files=%b", false));
+        detectCmdArgs.add(String.format("--detect.docker.passthrough.imageinspector.url=%s", imageInspectorUrl));
+        detectCmdArgs.add(String.format("--detect.docker.passthrough.shared.dir.path.imageinspector=%s", imageInspectorServiceSharedDirPath));
+        detectCmdArgs.add(String.format("--detect.docker.passthrough.shared.dir.path.local=%s", detectServiceSharedDirPath));
+        detectCmdArgs.add(String.format("--detect.cleanup.bom.tool.files=%b", detectCleanupBomToolFilesString.equalsIgnoreCase("true") ? true : false));
 
         detectCmdArgs.add(String.format("--detect.output.path=%s", outputFilePath));
 
         detectCmdArgs.add(String.format("--detect.docker.passthrough.on.host=%b", false));
-
-        // TODO This did not help
-        detectCmdArgs.add(String.format("--detect.hub.signature.scanner.memory=%d", 1024));
+        if (StringUtils.isNotBlank(signatureScannerMemoryString)) {
+            final int signatureScannerMemory = Integer.parseInt(signatureScannerMemoryString);
+            detectCmdArgs.add(String.format("--detect.hub.signature.scanner.memory=%d", signatureScannerMemory));
+        }
 
         detectCmdArgs.add(String.format("--detect.source.path=%s", SRC_DIR_PATH));
         if (StringUtils.isNotBlank(hubProjectName)) {
@@ -131,24 +168,26 @@ public class DetectServiceAction {
         if (StringUtils.isNotBlank(hubProjectName)) {
             detectCmdArgs.add(String.format("--detect.project.version.name=%s", hubProjectVersion));
         }
-        final Map<String, String> env = new HashMap<>();
-        env.put("DETECT_JAVA_OPTS", "-Xmx1G");
+        final Map<String, String> detectCmdEnv = new HashMap<>();
+        if (StringUtils.isNotBlank(detectJavaOpts)) {
+            detectCmdEnv.put("DETECT_JAVA_OPTS", detectJavaOpts);
+        }
 
         logger.info("Launching detect");
+        logger.debug(String.format("detectCmdArgs: %s", detectCmdArgs.toString()));
+        logger.debug(String.format("detectCmdEnv: %s", detectCmdEnv.toString()));
         final AsyncCmdExecutor executor = new AsyncCmdExecutor(readyDao, pgmDir,
-                env,
+                detectCmdEnv,
                 DETECT_EXE_PATH, detectCmdArgs);
         final ExecutorService executorService = Executors.newSingleThreadExecutor();
-        // final Future<String> containerCleanerFuture =
         executorService.submit(executor);
     }
 
     private void downloadDetect(final File pgmDir) throws IOException, InterruptedException, IntegrationException, ExecutableRunnerException {
         logger.info("Downloading detect");
         final Map<String, String> environmentVariables = new HashMap<>();
-        final String exePath = "curl";
-        final List<String> args = Arrays.asList("-s", "https://blackducksoftware.github.io/hub-detect/hub-detect.sh");
-        final String detectScriptString = SimpleExecutor.execute(pgmDir, environmentVariables, exePath, args);
+        final List<String> args = Arrays.asList(FETCH_DETECT_OPTION_SAVE, DETECT_EXE_URL);
+        final String detectScriptString = SimpleExecutor.execute(pgmDir, environmentVariables, FETCH_DETECT_CMD, args);
         final File detectScriptFile = new File(DETECT_EXE_PATH);
         FileUtils.write(detectScriptFile, detectScriptString, StandardCharsets.UTF_8);
         detectScriptFile.setExecutable(true);

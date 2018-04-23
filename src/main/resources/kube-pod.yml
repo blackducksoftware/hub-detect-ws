@@ -15,6 +15,46 @@ spec:
         configMapKeyRef:
           name: hub-detect-ws
           key: hub.url
+    - name: HUB_USERNAME
+      valueFrom:
+        configMapKeyRef:
+          name: hub-detect-ws
+          key: hub.username
+    - name: HUB_PASSWORD
+      valueFrom:
+        configMapKeyRef:
+          name: hub-detect-ws
+          key: hub.password
+    - name: LOGGING_LEVEL
+      valueFrom:
+        configMapKeyRef:
+          name: hub-detect-ws
+          key: logging.level
+    - name: DETECT_CLEANUP_BOM_TOOL_FILES
+      valueFrom:
+        configMapKeyRef:
+          name: hub-detect-ws
+          key: detect.cleanup.bom.tool.files
+    - name: HUB_TRUST
+      valueFrom:
+        configMapKeyRef:
+          name: hub-detect-ws
+          key: hub.trust
+    - name: SCANNER_MEMORY
+      valueFrom:
+        configMapKeyRef:
+          name: hub-detect-ws
+          key: detect.hub.signature.scanner.memory
+    - name: DETECT_JAVA_OPTS
+      valueFrom:
+        configMapKeyRef:
+          name: hub-detect-ws
+          key: detect.java.opts
+    - name: IMAGE_INSPECTOR_URL
+      valueFrom:
+        configMapKeyRef:
+          name: hub-detect-ws
+          key: image.inspector.url
     volumeMounts:
     - name: blackduck-shared-dir
       mountPath: /opt/blackduck/shared

@@ -4,9 +4,12 @@ metadata:
   name: hub-detect-ws
   namespace: hub-detect-ws
 data:
-  hub.url: https://int-hub04.dc1.lan
-  hub.username: sysadmin
-  hub.password: blackduck
-  hub.always.trust.cert: "false"
-  logging.level: DEBUG
-  
+  hub.url: "https://int-hub04.dc1.lan"
+  hub.username: "sysadmin"
+  hub.password: "blackduck"
+  logging.level: "DEBUG"
+  image.inspector.url: "http://192.168.99.100:8080"
+  detect.java.opts: "-Xmx1G"
+  detect.hub.signature.scanner.memory: "1024"
+  detect.cleanup.bom.tool.files: "true"
+  hub.trust: "true"
