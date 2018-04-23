@@ -105,7 +105,7 @@ sleep 5
 echo "--------------------------------------------------------------"
 echo "Creating configMap"
 echo "--------------------------------------------------------------"
-kubectl --namespace hub-detect-ws create configmap hub-detect-ws --from-literal=hub.url=https://int-hub04.dc1.lan
+kubectl create -f src/main/resources/configmap.yml
 sleep 5
 
 echo "--------------------------------------------------------------"

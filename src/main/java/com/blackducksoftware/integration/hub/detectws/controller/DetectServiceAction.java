@@ -65,7 +65,19 @@ public class DetectServiceAction {
     ReadyDao readyDao;
 
     @Value("${hub.url}")
-    private String hubUrlFormatString;
+    private String hubUrl;
+
+    @Value("${hub.username}")
+    private String hubUsername;
+
+    @Value("${hub.password}")
+    private String hubPassword;
+
+    @Value("${hub.always.trust.cert}")
+    private boolean hubTrustCert;
+
+    @Value("${logging.level}")
+    private String loggingLevel;
 
     public String scanImage(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir)
             throws IntegrationException, IOException, InterruptedException, ExecutableRunnerException {
@@ -91,10 +103,10 @@ public class DetectServiceAction {
         final List<String> detectCmdArgs = new ArrayList<>();
         // TODO un-hardcode
         detectCmdArgs.add(String.format("--blackduck.hub.url=%s", hubUrl));
-        detectCmdArgs.add(String.format("--blackduck.hub.username=%s", "sysadmin"));
-        detectCmdArgs.add(String.format("--blackduck.hub.password=%s", "blackduck"));
-        detectCmdArgs.add(String.format("--blackduck.hub.trust.cert=%b", true));
-        detectCmdArgs.add(String.format("--logging.level.com.blackducksoftware.integration=%s", "DEBUG"));
+        detectCmdArgs.add(String.format("--blackduck.hub.username=%s", hubUsername));
+        detectCmdArgs.add(String.format("--blackduck.hub.password=%s", hubPassword));
+        detectCmdArgs.add(String.format("--blackduck.hub.trust.cert=%b", hubTrustCert));
+        detectCmdArgs.add(String.format("--logging.level.com.blackducksoftware.integration=%s", loggingLevel));
         detectCmdArgs.add(String.format("--detect.docker.tar=%s", dockerTarfilePath));
 
         // TODO TEMP

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hub-detect-ws
+  namespace: hub-detect-ws
+data:
+  hub.url: https://int-hub04.dc1.lan
+  hub.username: sysadmin
+  hub.password: blackduck
+  hub.always.trust.cert: "false"
+  logging.level: DEBUG
+  
