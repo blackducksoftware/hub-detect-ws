@@ -32,7 +32,9 @@ curl -X GET  -i http://$(minikube ip):8083/ready # wait for a 200 response
 curl -X POST -i http://$(minikube ip):8083/scaninspectimage?tarfile=/opt/blackduck/shared/target/debian.tar
 curl -X GET  -i http://$(minikube ip):8083/ready # wait for a 200 response
 ```
-You should get an HTTP 202 response indicating that the request was accepted. When it's done, a Scan will appear on the Hub's Scans screen. To get the log:
+You should get an HTTP 202 response indicating that the request was accepted. While the request is being processed, the ready endpoint will return 503. When processing of that request has finished, a Scan and a BOM will appear on the Hub's Scans screen, and the ready endpoint will return 200. 
+
+To get the log from the service:
 ```
 kubectl logs --namespace hub-detect-ws hub-detect-ws -c hub-detect-ws
 ```
@@ -42,6 +44,7 @@ kubectl logs --namespace hub-detect-ws hub-detect-ws -c hub-imageinspector-ws-al
 kubectl logs --namespace hub-detect-ws hub-detect-ws -c hub-imageinspector-ws-centos
 kubectl logs --namespace hub-detect-ws hub-detect-ws -c hub-imageinspector-ws-ubuntu
 ```
+Subsequent runs on the same tarfile will hit a permission error writing the container filesystem output file. Executing "rm -rf ~/hub-detect-ws/shared/output/*.gz" between runs will avoid this.
 
 # Build #
 TBD
