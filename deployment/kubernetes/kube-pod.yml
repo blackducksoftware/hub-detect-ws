@@ -92,5 +92,5 @@ spec:
     configMap:
       name: spring-app-config
       items:
-      - key: runtime.properties
-        path: runtime.properties
+      - key: application.properties
+        path: application.properties

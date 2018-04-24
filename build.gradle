@@ -100,7 +100,8 @@ task createDockerfile(type: Dockerfile) {
             environmentVariable 'DETECT_DOCKER_PASSTHROUGH_DOCKER_INSPECTOR_VERSION', '5.0.0-SNAPSHOT'
             /////// END TEMP //////////////////
             user '10001'
-            entryPoint "java", /*"-Xmx2G",*/ "-jar", "${imagePgmDir}/${appName}.jar", "--server.port=8083", "--spring.config.name=runtime"
+            workingDir "${imagePgmDir}"
+            entryPoint "java", "-jar", "${appName}.jar", "--server.port=8083"
 }
 
 

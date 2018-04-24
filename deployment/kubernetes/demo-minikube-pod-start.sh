@@ -97,18 +97,6 @@ echo "--------------------------------------------------------------"
 sed "s+@WORKINGDIR@+${workingDir}+g" deployment/kubernetes/kube-pod.yml > ${workingDir}/kube-pod.yml
 
 echo "--------------------------------------------------------------"
-echo "Creating namespace"
-echo "--------------------------------------------------------------"
-kubectl create -f deployment/kubernetes/kube-namespace.yml
-sleep 5
-
-echo "--------------------------------------------------------------"
-echo "Creating configMap"
-echo "--------------------------------------------------------------"
-kubectl --namespace hub-detect-ws create configmap spring-app-config --from-file=deployment/kubernetes/runtime.properties
-sleep 5
-
-echo "--------------------------------------------------------------"
 echo "Creating service"
 echo "--------------------------------------------------------------"
 kubectl create -f deployment/kubernetes/kube-service.yml
