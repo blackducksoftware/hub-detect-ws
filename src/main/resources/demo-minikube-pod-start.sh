@@ -105,7 +105,7 @@ sleep 5
 echo "--------------------------------------------------------------"
 echo "Creating configMap"
 echo "--------------------------------------------------------------"
-kubectl create -f src/main/resources/configmap.yml
+kubectl --namespace hub-detect-ws create configmap spring-app-config --from-file=src/main/resources/runtime.properties
 sleep 5
 
 echo "--------------------------------------------------------------"

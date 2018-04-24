@@ -97,6 +97,9 @@ public class DetectServiceAction {
     @Value("${detect.cleanup.bom.tool.files}")
     private String detectCleanupBomToolFilesString;
 
+    @Value("${service.request.timeout.seconds}")
+    private String serviceRequestTimeoutSecondsString;
+
     @Value("${hub.trust}")
     private String hubTrustString;
 
@@ -131,6 +134,7 @@ public class DetectServiceAction {
         logger.debug(String.format("detectJavaOpts: %s", detectJavaOpts));
         logger.debug(String.format("signatureScannerMemoryString: %s", signatureScannerMemoryString));
         logger.debug(String.format("detectCleanupBomToolFilesString: %s", detectCleanupBomToolFilesString));
+        logger.debug(String.format("serviceRequestTimeoutSecondsString: %s", serviceRequestTimeoutSecondsString));
 
         // TODO output dir should get cleaned up later somehow
         final String outputFilePath = String.format("%s/run_%d_%d", OUTPUT_DIR_PATH, new Date().getTime(), (int) (Math.random() * 10000));
@@ -148,6 +152,9 @@ public class DetectServiceAction {
         detectCmdArgs.add(String.format("--detect.docker.passthrough.imageinspector.url=%s", imageInspectorUrl));
         detectCmdArgs.add(String.format("--detect.docker.passthrough.shared.dir.path.imageinspector=%s", imageInspectorServiceSharedDirPath));
         detectCmdArgs.add(String.format("--detect.docker.passthrough.shared.dir.path.local=%s", detectServiceSharedDirPath));
+        final int serviceRequestTimeoutSeconds = Integer.parseInt(serviceRequestTimeoutSecondsString);
+        final long serviceRequestTimeoutMilliseconds = serviceRequestTimeoutSeconds * 1000;
+        detectCmdArgs.add(String.format("--detect.docker.passthrough.command.timeout=%d", serviceRequestTimeoutMilliseconds));
         detectCmdArgs.add(String.format("--detect.cleanup.bom.tool.files=%b", detectCleanupBomToolFilesString.equalsIgnoreCase("true") ? true : false));
 
         detectCmdArgs.add(String.format("--detect.output.path=%s", outputFilePath));
