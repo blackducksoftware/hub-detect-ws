@@ -3,28 +3,26 @@ A container-based Web Service for scanning (via the file signature-based iScan) 
 
 This service is IN DEVELOPMENT / not ready for production use. Anything (including endpoint names) might change before it is released. Current state: The service only runs iScan on the target image tarfile; it does not run the image inspector yet.
 
-# Quick Start in a Docker Environment #
-Docker must be running.
-
-```
-git clone https://github.com/blackducksoftware/hub-detect-ws
-cd hub-detect-ws
-src/main/resources/demo-docker.sh
-curl -X POST -i http://localhost:8080/scaninspectimage?tarfile=/opt/blackduck/hub-detect-ws/target/alpine.tar
-
-```
-You should get an HTTP 202 response indicating that the request was accepted. When it's done, a Scan will appear on the Hub's Scans screen. To get the log:
-```
-docker logs hub-detect-ws
-```
-
 # Quick Start in a Minikube Environment
-Minikube must be running, started with: minikube start --memory 8000. The script will create and use namespace hub-detect-ws, and dir ~/hub-detect-ws.
+Minikube should be started with --memory 8000 (or more). If minikube is not running, it will be started automatically with --memory 8000. The scripts will create and use namespace hub-detect-ws, and dir ~/hub-detect-ws.
 
+Get the project from github:
 ```
 git clone https://github.com/blackducksoftware/hub-detect-ws
 cd hub-detect-ws
-src/main/resources/demo-minikube-pod-start.sh
+```
+
+Initialize the configmap and start the minikube dashboard:
+```
+deployment/kubernetes/demo-minikube-pod-initconfig.sh
+minikube dashboard
+```
+
+In the minikube dashboard, in namespace hub-detect-ws, edit the values of hub.url, hub.username, and hub.password in Config Map spring-app-config, file application.properties.
+
+Start the pod:
+```
+deployment/kubernetes/demo-minikube-pod-start.sh
 curl -X POST -i http://$(minikube ip):8083/scaninspectimage?tarfile=/opt/blackduck/shared/target/alpine.tar
 curl -X GET  -i http://$(minikube ip):8083/ready # wait for a 200 response
 curl -X POST -i http://$(minikube ip):8083/scaninspectimage?tarfile=/opt/blackduck/shared/target/fedora.tar
@@ -52,9 +50,7 @@ TBD
 # Where can I get the latest release? #
 You can download the latest source from GitHub: https://github.com/blackducksoftware/hub-detect-ws. 
 
-To try it in a Docker environment, you can use this bash script as a starting point: https://github.com/blackducksoftware/hub-detect-ws/blob/master/src/main/resources/demo-docker.sh.
-
-Ty try it in a Kubernetes environment, you use these bash scripts as a starting point: https://github.com/blackducksoftware/hub-detect-ws/blob/master/src/main/resources/demo-minikube-start.sh, https://github.com/blackducksoftware/hub-detect-ws/blob/master/src/main/resources/demo-minikube-stop.sh. They depend on: https://github.com/blackducksoftware/hub-detect-ws/blob/master/src/main/resources/kube-deployment.yml, https://github.com/blackducksoftware/hub-detect-ws/blob/master/src/main/resources/kube-service.yml.
+Ty try it in a Kubernetes environment, you use these bash scripts as a starting point: https://github.com/blackducksoftware/hub-detect-ws/blob/master/deployment/kubernetes/demo-minikube-initconfig.sh, https://github.com/blackducksoftware/hub-detect-ws/blob/master/deployment/kubernetes/demo-minikube-start.sh, https://github.com/blackducksoftware/hub-detect-ws/blob/master/src/main/resources/demo-minikube-stop.sh.
 
 # Documentation #
 hub-detect-ws is under development. You can use the provided bash scripts to try a pre-release version in either a Kubernetes or a Docker environment.
@@ -80,26 +76,20 @@ POST /scaninspectimage
 
 ## Trying hub-detect-ws in a Kubernetes (minikube) environment ##
 
-src/main/resources/demo-minikube-start.sh is a shell script that uses minikube to get a pod running, and then executes (and echo's) some curl commands to test the service.
-src/main/resources/demo-minikube-stop.sh will delete the deployment and service that the start script creates.
+deployment/kubernetes/demo-minikube-pod-initconfig.sh and deployment/kubernetes/demo-minikube-pod-start.sh are shell scripts that uses minikube to get a pod running. You can then use curl commands to test the service.
+deployment/kubernetes/demo-minikube-pod-stop.sh will delete the hub-detect-ws namespace from the cluster.
 
-Requirements: bash, minikube, java 8, curl, port 8080. It creates a ~/tmp/target dir.
+Once the pod is running you can communicate with it via port 8083. The demo-minikube-pod-start.sh script prints examples of curl commands you can use to test the service. The service exposes a /scaninspectimage endpoint that takes a path to a Docker image tarfile (the output of a "docker save" command), and returns HTTP status 202 if the request is succesfully received. At that point the service will start scanning and inspecting the image. Eventually it will upload the resulting BDIO files to the Hub. You can use the /ready endpoint to determine when the service is ready to accept another request. If /ready returns 503, it is still busy processing the last request. If it returns 200, the service is ready for another request.
 
-The script will start a 1-container pod, and expose port 8080. It exposes a "scaninspectimage" endpoint that takes a path to a Docker image tarfile (the output of a "docker save" command), and returns HTTP status 200 if the request is succesfully received. (Once implemented:) At that point the service will start scanning and inspecting the image. Eventually it will upload the resulting BDIO files to the Hub.
+## Other Endpoints ##
+
+Requirements: bash, minikube, java 8, curl, port 8080. It creates a ~/hub-detect-ws dir.
+
+The script will start a 1-container pod, and expose port 8083. It exposes a "scaninspectimage" endpoint that takes a path to a Docker image tarfile (the output of a "docker save" command), and returns HTTP status 200 if the request is succesfully received. (Once implemented:) At that point the service will start scanning and inspecting the image. Eventually it will upload the resulting BDIO files to the Hub.
 
 ## Configuring the service ##
 
-No configuration is required yet (because the real work is mocked).
-
-## Trying hub-detect-ws in a Docker environment ##
-
-src/main/resources/demo-docker.sh is a shell script that uses docker to get a container running, and then suggests (echo's) some curl commands to test the service.
-
-Requirements: bash, docker, java 8, curl, port 8080, and a /tmp dir.
-
-The script will start a containerized web service running on port 8080. It exposes a "scaninspectimage" endpoint that takes a path to a Docker image tarfile (the output of a "docker save" command), and returns HTTP status 200 if the request is succesfully received. (Once implemented:) At that point the service will start scanning and inspecting the image. Eventually it will upload the resulting BDIO files to the Hub.
-
-## Other Endpoints ##
+You can configure the service by changing the values in the spring-app-config Config Map.
 
 ```
 GET /trace # get history of http requests
