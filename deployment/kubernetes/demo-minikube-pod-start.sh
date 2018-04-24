@@ -94,24 +94,24 @@ fi
 echo "--------------------------------------------------------------"
 echo "Pre-processing kube yaml file"
 echo "--------------------------------------------------------------"
-sed "s+@WORKINGDIR@+${workingDir}+g" src/main/resources/kube-pod.yml > ${workingDir}/kube-pod.yml
+sed "s+@WORKINGDIR@+${workingDir}+g" deployment/kubernetes/kube-pod.yml > ${workingDir}/kube-pod.yml
 
 echo "--------------------------------------------------------------"
 echo "Creating namespace"
 echo "--------------------------------------------------------------"
-kubectl create -f src/main/resources/kube-namespace.yml
+kubectl create -f deployment/kubernetes/kube-namespace.yml
 sleep 5
 
 echo "--------------------------------------------------------------"
 echo "Creating configMap"
 echo "--------------------------------------------------------------"
-kubectl --namespace hub-detect-ws create configmap spring-app-config --from-file=src/main/resources/runtime.properties
+kubectl --namespace hub-detect-ws create configmap spring-app-config --from-file=deployment/kubernetes/runtime.properties
 sleep 5
 
 echo "--------------------------------------------------------------"
 echo "Creating service"
 echo "--------------------------------------------------------------"
-kubectl create -f src/main/resources/kube-service.yml
+kubectl create -f deployment/kubernetes/kube-service.yml
 echo "Pausing to give the hub-detect-ws service time to start..."
 sleep 10
 

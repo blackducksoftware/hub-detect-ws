@@ -11,5 +11,4 @@ echo "--------------------------------------------------------------"
 kubectl delete service "${serviceName}" --namespace ${nameSpace}
 kubectl delete pod "${podName}" --namespace ${nameSpace}
 kubectl delete configmap "${configMapName}" --namespace ${nameSpace}
-kubectl delete configmap "${configMapName}"
 kubectl delete namespace "${nameSpace}"
