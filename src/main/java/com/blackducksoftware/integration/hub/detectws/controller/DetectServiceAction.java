@@ -100,7 +100,7 @@ public class DetectServiceAction {
     @Value("${service.request.timeout.seconds}")
     private String serviceRequestTimeoutSecondsString;
 
-    @Value("${hub.trust}")
+    @Value("${hub.trust.cert}")
     private String hubTrustString;
 
     public String scanImage(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir)
