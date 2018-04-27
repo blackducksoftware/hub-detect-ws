@@ -58,7 +58,7 @@ public class AsyncCmdExecutor implements Callable<String> {
     public String call() throws Exception {
         logger.info(String.format("Worker thread: %s", Thread.currentThread().getName()));
         final String stdout = SimpleExecutor.execute(workingDir, environmentVariables, exePath, args);
-        readyDao.setReady(true);
+        readyDao.setReadyFlag();
         return stdout;
     }
 

@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.detectws.controller.DetectServiceAction;
 
 @Component
@@ -39,31 +40,48 @@ public class ReadyDao {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final String READY_FILE_PATH = String.format("%s/ready.txt", DetectServiceAction.PGM_DIR);
     private static final File readyFile = new File(READY_FILE_PATH);
+    private static final String NOT_READY = new Boolean(false).toString();
+    private static final String READY = new Boolean(true).toString();
 
     public boolean isReady() {
         synchronized (this) {
-            if (!readyFile.canRead()) {
-                return false;
-            }
-            try {
-                final String readyString = FileUtils.readFileToString(readyFile, StandardCharsets.UTF_8);
-                if ("true".equals(readyString)) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } catch (final IOException e) {
-                logger.warn(String.format("Error reading ready state file: %s", READY_FILE_PATH));
-                return false;
-            }
+            return isReadyNonSynchronized();
         }
     }
 
-    public void setReady(final Boolean ready) throws IOException {
-        logger.info(String.format("Waiting for lock to set Application Ready state to %b", ready));
+    public void clearReadyFlag() throws IOException, IntegrationException {
+        logger.info(String.format("Waiting for lock before setting Application Ready state to %s", NOT_READY));
         synchronized (this) {
-            logger.info(String.format("Setting Application Ready state to %s", ready.toString()));
-            FileUtils.write(readyFile, ready.toString(), StandardCharsets.UTF_8);
+            if (!isReadyNonSynchronized()) {
+                throw new IntegrationException("The service is busy processing another request");
+            }
+            logger.info(String.format("Setting Application Ready state to %s", NOT_READY));
+            FileUtils.write(readyFile, NOT_READY, StandardCharsets.UTF_8);
+        }
+    }
+
+    public void setReadyFlag() throws IOException {
+        logger.info(String.format("Waiting for lock before setting Application Ready state to %s", READY));
+        synchronized (this) {
+            logger.info(String.format("Setting Application Ready state to %s", READY));
+            FileUtils.write(readyFile, READY, StandardCharsets.UTF_8);
+        }
+    }
+
+    private boolean isReadyNonSynchronized() {
+        if (!readyFile.canRead()) {
+            return false;
+        }
+        try {
+            final String readyString = FileUtils.readFileToString(readyFile, StandardCharsets.UTF_8);
+            if ("true".equals(readyString)) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (final IOException e) {
+            logger.warn(String.format("Error reading ready state file: %s", READY_FILE_PATH));
+            return false;
         }
     }
 

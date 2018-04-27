@@ -105,6 +105,7 @@ public class DetectServiceAction {
 
     public String scanImage(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir)
             throws IntegrationException, IOException, InterruptedException, ExecutableRunnerException {
+        readyDao.clearReadyFlag();
         // TODO Do something with codelocationprefix and cleanup args
         final String msg = String.format("hub-detect-ws v%s: dockerTarfilePath: %s, hubProjectName: %s, hubProjectVersion: %s, codeLocationPrefix: %s, cleanupWorkingDir: %b", programVersion.getProgramVersion(), dockerTarfilePath,
                 hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir);
@@ -121,8 +122,6 @@ public class DetectServiceAction {
 
     private void launchDetectAsync(final File pgmDir, final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion) throws IOException {
         // TODO add support for project name/version with spaces
-        readyDao.setReady(false);
-
         logger.debug(String.format("hubUrl: %s", hubUrl));
         logger.debug(String.format("hubUsername: %s", hubUsername));
         logger.debug(String.format("hubPassword: %s", hubPassword));
@@ -189,6 +188,7 @@ public class DetectServiceAction {
 
     private void downloadDetect(final File pgmDir) throws IOException, InterruptedException, IntegrationException, ExecutableRunnerException {
         logger.info("Downloading detect");
+        // TODO don't download it every time?
         final Map<String, String> environmentVariables = new HashMap<>();
         final List<String> args = Arrays.asList(FETCH_DETECT_OPTION_SAVE, DETECT_EXE_URL);
         final String detectScriptString = SimpleExecutor.execute(pgmDir, environmentVariables, FETCH_DETECT_CMD, args);

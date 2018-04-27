@@ -34,6 +34,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.detectws.state.ReadyDao;
 
 @SpringBootApplication(scanBasePackages = { "com.blackducksoftware.integration.hub.detectws" })
@@ -57,8 +58,8 @@ public class Application {
         public void destroy() {
             logger.info("destroy() called; setting ready state to false");
             try {
-                readyDao.setReady(false);
-            } catch (final IOException e) {
+                readyDao.clearReadyFlag();
+            } catch (final IOException | IntegrationException e) {
                 logger.error(String.format("Error trying to set ready state to false: %s", e.getMessage()));
             }
         }

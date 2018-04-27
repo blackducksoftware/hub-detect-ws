@@ -40,6 +40,6 @@ public class AppReadyListener {
 
     @EventListener
     public void onApplicationEvent(final ContextRefreshedEvent event) throws IOException {
-        ready.setReady(true);
+        ready.setReadyFlag();
     }
 }
