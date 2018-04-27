@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
+import com.blackducksoftware.integration.hub.detectws.app.exception.ServiceIsBusyException;
 import com.blackducksoftware.integration.hub.detectws.controller.DetectServiceAction;
 
 @Component
@@ -53,7 +54,7 @@ public class ReadyDao {
         logger.info(String.format("Waiting for lock before setting Application Ready state to %s", NOT_READY));
         synchronized (this) {
             if (!isReadyNonSynchronized()) {
-                throw new IntegrationException("The service is busy processing another request");
+                throw new ServiceIsBusyException("The service is busy processing another request");
             }
             logger.info(String.format("Setting Application Ready state to %s", NOT_READY));
             FileUtils.write(readyFile, NOT_READY, StandardCharsets.UTF_8);

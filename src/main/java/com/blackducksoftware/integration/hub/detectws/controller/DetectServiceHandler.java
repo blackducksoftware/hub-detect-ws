@@ -30,6 +30,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import com.blackducksoftware.integration.hub.detectws.app.exception.ServiceIsBusyException;
+
 @Component
 public class DetectServiceHandler {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -45,6 +47,9 @@ public class DetectServiceHandler {
         try {
             final String bdio = imageInspectorAction.scanImage(tarFilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir);
             return responseFactory.createResponseAccepted(bdio);
+        } catch (final ServiceIsBusyException e) {
+            logger.error(e.getMessage());
+            return responseFactory.createResponse(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
         } catch (final Exception e) {
             logger.error(String.format("Exception thrown while getting image packages: %s", e.getMessage()), e);
             return responseFactory.createResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
