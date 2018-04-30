@@ -169,15 +169,15 @@ public class InMinikubeTest {
         final String readyResponse = execCmd(String.format("curl -X GET -i http://%s:%s/ready", clusterIp, PORT), 30);
         System.out.printf("readyResponse: %s", readyResponse);
         assertTrue(readyResponse.startsWith("HTTP/1.1 200"));
-        String scanResponse = execCmd(String.format("curl -X POST -i http://%s:%s/scaninspectimage?tarfile=/opt/blackduck/shared/target/alpine.tar", clusterIp, PORT), 30);
+        String scanResponse = execCmd(String.format("curl -X POST -i http://%s:%s/scaninspectimage?detect.docker.tar=/opt/blackduck/shared/target/alpine.tar", clusterIp, PORT), 30);
         System.out.printf("scanResponse: %s", scanResponse);
         assertTrue(scanResponse.startsWith("HTTP/1.1 202"));
         waitForServiceReady();
-        scanResponse = execCmd(String.format("curl -X POST -i http://%s:%s/scaninspectimage?tarfile=/opt/blackduck/shared/target/fedora.tar", clusterIp, PORT), 30);
+        scanResponse = execCmd(String.format("curl -X POST -i http://%s:%s/scaninspectimage?detect.docker.tar=/opt/blackduck/shared/target/fedora.tar", clusterIp, PORT), 30);
         System.out.printf("scanResponse: %s", scanResponse);
         assertTrue(scanResponse.startsWith("HTTP/1.1 202"));
         waitForServiceReady();
-        scanResponse = execCmd(String.format("curl -X POST -i http://%s:%s/scaninspectimage?tarfile=/opt/blackduck/shared/target/debian.tar", clusterIp, PORT), 30);
+        scanResponse = execCmd(String.format("curl -X POST -i http://%s:%s/scaninspectimage?detect.docker.tar=/opt/blackduck/shared/target/debian.tar", clusterIp, PORT), 30);
         System.out.printf("scanResponse: %s", scanResponse);
         assertTrue(scanResponse.startsWith("HTTP/1.1 202"));
         waitForServiceReady();

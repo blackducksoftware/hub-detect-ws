@@ -33,11 +33,11 @@ Step 5: Test the service.
 The following are examples of curl commands you can use to test the service:
 
 ```
-curl -X POST -i http://$(minikube ip):8083/scaninspectimage?tarfile=/opt/blackduck/shared/target/alpine.tar
+curl -X POST -i http://$(minikube ip):8083/scaninspectimage?detect.docker.tar=/opt/blackduck/shared/target/alpine.tar
 curl -X GET  -i http://$(minikube ip):8083/ready # wait for a 200 response
-curl -X POST -i http://$(minikube ip):8083/scaninspectimage?tarfile=/opt/blackduck/shared/target/fedora.tar
+curl -X POST -i http://$(minikube ip):8083/scaninspectimage?detect.docker.tar=/opt/blackduck/shared/target/fedora.tar
 curl -X GET  -i http://$(minikube ip):8083/ready # wait for a 200 response
-curl -X POST -i http://$(minikube ip):8083/scaninspectimage?tarfile=/opt/blackduck/shared/target/debian.tar
+curl -X POST -i http://$(minikube ip):8083/scaninspectimage?detect.docker.tar=/opt/blackduck/shared/target/debian.tar
 curl -X GET  -i http://$(minikube ip):8083/ready # wait for a 200 response
 ```
 
@@ -45,7 +45,7 @@ From each POST to /scaninspectimage, you should get an HTTP 202 response indicat
 
 Subsequent runs on the same tarfile will hit a permission error writing the container filesystem output file. Executing "rm -rf ~/hub-detect-ws/shared/output/*.gz" between runs will avoid this.
 
-To delete the hub-detect-ws namespace from the cluster:
+To delete the pod and the service from the cluster:
 
 ```
 deployment/kubernetes/demo-minikube-pod-stop.sh
@@ -80,12 +80,12 @@ hub-detect-ws is under development. You can use the provided scripts to try a pr
 
 GET /ready # Make sure this endpoint returns 200 before calling /scaninspectimage
 POST /scaninspectimage
-* Mandatory query param: tarfile=`<path to Docker image tarfile>`
-* Optional query params:
-  * hubprojectname=`<Hub project name>`
-  * hubprojectversion=`<Hub project version>`
-  * codelocationprefix=`<Hub CodeLocation name prefix>` # currently ignored
-  * cleanup=`<cleanup working dirs when done: true or false; default: true>` # currently ignored
+* Query parameters: Any detect property related to inspecting/scanning docker tarfiles.
+* Mandatory query param: detect.docker.tar=`<path to Docker image tarfile in the pod>`
+* Optional query params include:
+  * detect.project.name=`<Hub project name>`
+  * detect.project.version.name=`<Hub project version>`
+
 
 ## Other Endpoints ##
 

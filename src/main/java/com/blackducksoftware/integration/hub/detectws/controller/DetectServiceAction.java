@@ -62,9 +62,6 @@ public class DetectServiceAction {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private ProgramVersion programVersion;
-
-    @Autowired
     ReadyDao readyDao;
 
     @Value("${hub.url}")
@@ -103,16 +100,12 @@ public class DetectServiceAction {
     @Value("${hub.trust.cert}")
     private String hubTrustString;
 
-    public String scanImage(final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion, final String codeLocationPrefix, final boolean cleanupWorkingDir)
+    public String scanImage(final Map<String, String> requestParams)
             throws IntegrationException, IOException, InterruptedException, ExecutableRunnerException {
         readyDao.clearReadyFlag();
-        // TODO Do something with codelocationprefix and cleanup args
-        final String msg = String.format("hub-detect-ws v%s: dockerTarfilePath: %s, hubProjectName: %s, hubProjectVersion: %s, codeLocationPrefix: %s, cleanupWorkingDir: %b", programVersion.getProgramVersion(), dockerTarfilePath,
-                hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir);
-        logger.info(msg);
         final File pgmDir = new File(PGM_DIR);
         downloadDetect(pgmDir);
-        launchDetectAsync(pgmDir, dockerTarfilePath, hubProjectName, hubProjectVersion);
+        launchDetectAsync(pgmDir, requestParams);
         return "scan/inspect image request accepted";
     }
 
@@ -120,7 +113,7 @@ public class DetectServiceAction {
         return readyDao.isReady();
     }
 
-    private void launchDetectAsync(final File pgmDir, final String dockerTarfilePath, final String hubProjectName, final String hubProjectVersion) throws IOException {
+    private void launchDetectAsync(final File pgmDir, final Map<String, String> requestParams) throws IOException {
         // TODO add support for project name/version with spaces
         logger.debug(String.format("hubUrl: %s", hubUrl));
         logger.debug(String.format("hubUsername: %s", hubUsername));
@@ -135,55 +128,51 @@ public class DetectServiceAction {
         logger.debug(String.format("detectCleanupBomToolFilesString: %s", detectCleanupBomToolFilesString));
         logger.debug(String.format("serviceRequestTimeoutSecondsString: %s", serviceRequestTimeoutSecondsString));
 
+        // Build map of properties to pass to detect
+        // Pre-populate it with @Values
+        // Then put values in from requestParams, so in case of conflict: requestParams wins
+        final Map<String, String> detectParams = new HashMap<>();
+        detectParams.put("blackduck.hub.url", hubUrl);
+        detectParams.put("blackduck.hub.username", hubUsername);
+        detectParams.put("blackduck.hub.password", hubPassword);
+        detectParams.put("blackduck.hub.trust.cert", hubTrustString);
+        detectParams.put("logging.level.com.blackducksoftware.integration", loggingLevel);
+        detectParams.put("detect.excluded.bom.tool.types", "GRADLE");
+        detectParams.put("detect.docker.passthrough.imageinspector.url", imageInspectorUrl);
+        detectParams.put("detect.docker.passthrough.shared.dir.path.imageinspector", imageInspectorServiceSharedDirPath);
+        detectParams.put("detect.docker.passthrough.shared.dir.path.local", detectServiceSharedDirPath);
+        final long serviceRequestTimeoutSeconds = Integer.parseInt(serviceRequestTimeoutSecondsString);
+        final Long serviceRequestTimeoutMilliseconds = serviceRequestTimeoutSeconds * 1000L;
+        detectParams.put("detect.docker.passthrough.command.timeout", serviceRequestTimeoutMilliseconds.toString());
+        detectParams.put("detect.cleanup.bom.tool.files", detectCleanupBomToolFilesString);
         // TODO output dir should get cleaned up later somehow
         final String outputFilePath = String.format("%s/run_%d_%d", OUTPUT_DIR_PATH, new Date().getTime(), (int) (Math.random() * 10000));
-        final List<String> detectCmdArgs = new ArrayList<>();
-        detectCmdArgs.add(String.format("--blackduck.hub.url=%s", hubUrl));
-        detectCmdArgs.add(String.format("--blackduck.hub.username=%s", hubUsername));
-        detectCmdArgs.add(String.format("--blackduck.hub.password=%s", hubPassword));
-        detectCmdArgs.add(String.format("--blackduck.hub.trust.cert=%b", hubTrustString.equalsIgnoreCase("true") ? true : false));
-        detectCmdArgs.add(String.format("--logging.level.com.blackducksoftware.integration=%s", loggingLevel));
-        detectCmdArgs.add(String.format("--detect.docker.tar=%s", dockerTarfilePath));
+        detectParams.put("detect.output.path", outputFilePath);
+        detectParams.put("detect.docker.passthrough.on.host", "false");
+        detectParams.put("detect.hub.signature.scanner.memory", signatureScannerMemoryString);
+        detectParams.put("detect.source.path", SRC_DIR_PATH);
+        detectParams.putAll(requestParams);
 
-        // TODO TEMP; when "exclude all" is available: use that
-        detectCmdArgs.add(String.format("--detect.excluded.bom.tool.types=%s", "GRADLE"));
-
-        detectCmdArgs.add(String.format("--detect.docker.passthrough.imageinspector.url=%s", imageInspectorUrl));
-        detectCmdArgs.add(String.format("--detect.docker.passthrough.shared.dir.path.imageinspector=%s", imageInspectorServiceSharedDirPath));
-        detectCmdArgs.add(String.format("--detect.docker.passthrough.shared.dir.path.local=%s", detectServiceSharedDirPath));
-        final int serviceRequestTimeoutSeconds = Integer.parseInt(serviceRequestTimeoutSecondsString);
-        final long serviceRequestTimeoutMilliseconds = serviceRequestTimeoutSeconds * 1000;
-        detectCmdArgs.add(String.format("--detect.docker.passthrough.command.timeout=%d", serviceRequestTimeoutMilliseconds));
-        detectCmdArgs.add(String.format("--detect.cleanup.bom.tool.files=%b", detectCleanupBomToolFilesString.equalsIgnoreCase("true") ? true : false));
-
-        detectCmdArgs.add(String.format("--detect.output.path=%s", outputFilePath));
-
-        detectCmdArgs.add(String.format("--detect.docker.passthrough.on.host=%b", false));
-        if (StringUtils.isNotBlank(signatureScannerMemoryString)) {
-            final int signatureScannerMemory = Integer.parseInt(signatureScannerMemoryString);
-            detectCmdArgs.add(String.format("--detect.hub.signature.scanner.memory=%d", signatureScannerMemory));
-        }
-
-        detectCmdArgs.add(String.format("--detect.source.path=%s", SRC_DIR_PATH));
-        if (StringUtils.isNotBlank(hubProjectName)) {
-            detectCmdArgs.add(String.format("--detect.project.name=%s", hubProjectName));
-        }
-        if (StringUtils.isNotBlank(hubProjectName)) {
-            detectCmdArgs.add(String.format("--detect.project.version.name=%s", hubProjectVersion));
-        }
         final Map<String, String> detectCmdEnv = new HashMap<>();
         if (StringUtils.isNotBlank(detectJavaOpts)) {
             detectCmdEnv.put("DETECT_JAVA_OPTS", detectJavaOpts);
         }
 
         logger.info("Launching detect");
-        logger.debug(String.format("detectCmdArgs: %s", detectCmdArgs.toString()));
+        logger.debug(String.format("detectCmdArgs: %s", detectParams.toString()));
         logger.debug(String.format("detectCmdEnv: %s", detectCmdEnv.toString()));
+        final List<String> detectCmdArgs = propertiesToArgs(detectParams);
         final AsyncCmdExecutor executor = new AsyncCmdExecutor(readyDao, pgmDir,
                 detectCmdEnv,
                 DETECT_EXE_PATH, detectCmdArgs);
         final ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.submit(executor);
+    }
+
+    private List<String> propertiesToArgs(final Map<String, String> properties) {
+        final List<String> args = new ArrayList<>();
+        properties.forEach((key, value) -> args.add(String.format("--%s=%s", key, value)));
+        return args;
     }
 
     private void downloadDetect(final File pgmDir) throws IOException, InterruptedException, IntegrationException, ExecutableRunnerException {

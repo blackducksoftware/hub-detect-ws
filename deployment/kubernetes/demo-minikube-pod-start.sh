@@ -116,18 +116,18 @@ echo "--------------------------------------------------------------"
 clusterIp=$(minikube ip)
 ##servicePort=$(kubectl describe services hub-detect-ws --namespace ${nameSpace}|grep -v '^Type:'|grep NodePort|awk '{print $3}'|sed 's/\/TCP//')
 servicePort=8083
-cmd="curl -X POST -i http://${clusterIp}:${servicePort}/scaninspectimage?tarfile=/opt/blackduck/shared/target/alpine.tar"
+cmd="curl -X POST -i http://${clusterIp}:${servicePort}/scaninspectimage?detect.docker.tar=/opt/blackduck/shared/target/alpine.tar"
 echo "${cmd}"
 ######$cmd
 echo "--------------------------------------------------------------"
 echo "To use service to get BDIO for fedora"
 echo "--------------------------------------------------------------"
-cmd="curl -X POST -i http://${clusterIp}:${servicePort}/scaninspectimage?tarfile=/opt/blackduck/shared/target/fedora.tar"
+cmd="curl -X POST -i http://${clusterIp}:${servicePort}/scaninspectimage?detect.docker.tar=/opt/blackduck/shared/target/fedora.tar"
 echo "${cmd}"
 ######$cmd
 echo "--------------------------------------------------------------"
 echo "To use service to get BDIO for debian"
 echo "--------------------------------------------------------------"
-cmd="curl -X POST -i http://${clusterIp}:${servicePort}/scaninspectimage?tarfile=/opt/blackduck/shared/target/debian.tar"
+cmd="curl -X POST -i http://${clusterIp}:${servicePort}/scaninspectimage?detect.docker.tar=/opt/blackduck/shared/target/debian.tar"
 echo "${cmd}"
 ######$cmd

@@ -23,6 +23,8 @@
  */
 package com.blackducksoftware.integration.hub.detectws.controller;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -40,28 +42,20 @@ public class DetectServiceController {
     // Endpoints
     private static final String SCAN_INSPECT_IMAGE = "/scaninspectimage";
     private static final String READY_TO_SCANINSPECT = "/ready";
-    // Mandatory query param
-    static final String TARFILE_PATH_QUERY_PARAM = "tarfile";
-    // Optional query params
-    static final String HUB_PROJECT_NAME_QUERY_PARAM = "hubprojectname";
-    static final String HUB_PROJECT_VERSION_QUERY_PARAM = "hubprojectversion";
-    static final String CODELOCATION_PREFIX_QUERY_PARAM = "codelocationprefix";
-    static final String CLEANUP_WORKING_DIR_QUERY_PARAM = "cleanup";
 
     @Autowired
     private DetectServiceHandler imageInspectorHandler;
 
     @RequestMapping(path = SCAN_INSPECT_IMAGE, method = RequestMethod.POST)
-    public ResponseEntity<String> scanImage(final HttpServletRequest request, @RequestParam(value = TARFILE_PATH_QUERY_PARAM) final String tarFilePath,
-            @RequestParam(value = HUB_PROJECT_NAME_QUERY_PARAM, defaultValue = "") final String hubProjectName, @RequestParam(value = HUB_PROJECT_VERSION_QUERY_PARAM, defaultValue = "") final String hubProjectVersion,
-            @RequestParam(value = CODELOCATION_PREFIX_QUERY_PARAM, defaultValue = "") final String codeLocationPrefix,
-            @RequestParam(value = CLEANUP_WORKING_DIR_QUERY_PARAM, required = false, defaultValue = "true") final boolean cleanupWorkingDir) {
-        logger.info(String.format("Endpoint %s called; hubProjectName=%s, hubProjectVersion=%s; codeLocationPrefix=%s; cleanupWorkingDir=%b", SCAN_INSPECT_IMAGE, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir));
-        return imageInspectorHandler.scanImage(request.getScheme(), request.getServerName(), request.getServerPort(), request.getRequestURI(), tarFilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir);
+    public ResponseEntity<String> scanImage(final HttpServletRequest request, @RequestParam final Map<String, String> requestParams) {
+        logger.info(String.format("Endpoing %s called:", SCAN_INSPECT_IMAGE));
+        requestParams.forEach((key, value) -> logger.info(String.format("\t%s=%s", key, value)));
+        return imageInspectorHandler.scanImage(request.getScheme(), request.getServerName(), request.getServerPort(), request.getRequestURI(), requestParams);
     }
 
     @RequestMapping(path = READY_TO_SCANINSPECT, method = RequestMethod.GET)
     public ResponseEntity<String> ready(final HttpServletRequest request) {
+        logger.info(String.format("Endpoing %s called:", READY_TO_SCANINSPECT));
         return imageInspectorHandler.ready(request.getScheme(), request.getServerName(), request.getServerPort(), request.getRequestURI());
     }
 }

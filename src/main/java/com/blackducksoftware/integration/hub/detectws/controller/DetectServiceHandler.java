@@ -23,6 +23,8 @@
  */
 package com.blackducksoftware.integration.hub.detectws.controller;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +44,9 @@ public class DetectServiceHandler {
     @Autowired
     private ResponseFactory responseFactory;
 
-    public ResponseEntity<String> scanImage(final String scheme, final String host, final int port, final String requestUri, final String tarFilePath, final String hubProjectName, final String hubProjectVersion,
-            final String codeLocationPrefix, final boolean cleanupWorkingDir) {
+    public ResponseEntity<String> scanImage(final String scheme, final String host, final int port, final String requestUri, final Map<String, String> requestParams) {
         try {
-            final String bdio = imageInspectorAction.scanImage(tarFilePath, hubProjectName, hubProjectVersion, codeLocationPrefix, cleanupWorkingDir);
+            final String bdio = imageInspectorAction.scanImage(requestParams);
             return responseFactory.createResponseAccepted(bdio);
         } catch (final ServiceIsBusyException e) {
             logger.error(e.getMessage());
