@@ -80,13 +80,13 @@ hub-detect-ws is under development. There is no documentation yet other than thi
 
 ## Primary Endpoints ##
 
-GET /ready # Make sure this endpoint returns 200 before calling /scaninspectimage
-POST /scaninspectimage
-* Query parameters: Any detect property related to inspecting/scanning docker tarfiles.
-* Mandatory query param: detect.docker.tar=`<path to Docker image tarfile in the pod>`
-* Optional query params include:
-  * detect.project.name=`<Hub project name>`
-  * detect.project.version.name=`<Hub project version>`
+1. GET /ready # Make sure this endpoint returns 200 before calling /scaninspectimage
+1. POST /scaninspectimage
+  * Query parameters: Any detect property related to inspecting/scanning docker tarfiles.
+  * Mandatory query param: detect.docker.tar=`<path to Docker image tarfile in the pod>`
+  * Optional query params include:
+    * detect.project.name=`<Hub project name>`
+    * detect.project.version.name=`<Hub project version>`
 
 
 ## Other Endpoints ##
