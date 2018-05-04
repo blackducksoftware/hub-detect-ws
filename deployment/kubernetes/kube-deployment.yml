@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hub-detect-ws
+  namespace: hub-detect-ws
+  labels:
+    app: hub-detect-ws
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hub-detect-ws
+  template:
+    metadata:
+      labels:
+        app: hub-detect-ws
+    spec:
+      containers:
+      - name: hub-detect-ws
+        image: blackducksoftware/hub-detect-ws:0.2.0-SNAPSHOT
+        volumeMounts:
+        - name: blackduck-shared-dir
+          mountPath: /opt/blackduck/shared
+        - name: application-config
+          mountPath: /opt/blackduck/hub-detect-ws/config
+          readOnly: true
+        ports:
+        - containerPort: 8083
+          hostPort: 8083
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8083
+          initialDelaySeconds: 120
+          periodSeconds: 960
+          timeoutSeconds: 480
+          failureThreshold: 5
+        resources:
+          limits:
+            memory: 2Gi
+      - name: hub-imageinspector-ws-alpine
+        image: blackducksoftware/hub-imageinspector-ws-alpine:1.0.1-SNAPSHOT
+        volumeMounts:
+        - name: blackduck-shared-dir
+          mountPath: /opt/blackduck/shared
+        ports:
+        - containerPort: 8080
+          hostPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 960
+          timeoutSeconds: 480
+        resources:
+          limits:
+            memory: 1Gi
+      - name: hub-imageinspector-ws-centos
+        image: blackducksoftware/hub-imageinspector-ws-centos:1.0.1-SNAPSHOT
+        volumeMounts:
+        - name: blackduck-shared-dir
+          mountPath: /opt/blackduck/shared
+        ports:
+        - containerPort: 8081
+          hostPort: 8081
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8081
+          initialDelaySeconds: 120
+          periodSeconds: 960
+          timeoutSeconds: 480
+        resources:
+          limits:
+            memory: 1Gi
+      - name: hub-imageinspector-ws-ubuntu
+        image: blackducksoftware/hub-imageinspector-ws-ubuntu:1.0.1-SNAPSHOT
+        volumeMounts:
+        - name: blackduck-shared-dir
+          mountPath: /opt/blackduck/shared
+        ports:
+        - containerPort: 8082
+          hostPort: 8082
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8082
+          initialDelaySeconds: 120
+          periodSeconds: 960
+          timeoutSeconds: 480
+        resources:
+          limits:
+            memory: 1Gi
+      volumes:
+      - name: blackduck-shared-dir
+        hostPath:
+          path: @WORKINGDIR@/shared
+          type: Directory
+      - name: application-config
+        configMap:
+          name: spring-app-config
+          items:
+          - key: application.properties
+            path: application.properties

@@ -5,9 +5,9 @@ sharedDir="${workingDir}/shared"
 targetImageDir="${sharedDir}/target"
 outputDir="${sharedDir}/output"
 
-podName=hub-detect-ws
-serviceName=${podName}
-nameSpace=${podName}
+serviceName=hub-detect-ws
+deploymentName=${serviceName}
+nameSpace=${serviceName}
 minikubeMemory=8000
 
 function ensureKubeRunning() {
@@ -25,12 +25,12 @@ function ensureKubeRunning() {
 }
 
 function waitForPodToStart() {
-	requestedPodName=$1
+	waitForDeploymentName=$1
 	newPodName=""
 	
-	echo "Pausing to give the new pod for ${requestedPodName} time to start..."
+	echo "Pausing to give the new pod for ${waitForDeploymentName} time to start..."
 	sleep 20
-	newPodName=$(kubectl get pods --namespace ${nameSpace} | grep "${requestedPodName}"  | tr -s " " | cut -d' ' -f1)
+	newPodName=$(kubectl get pods --namespace ${nameSpace} | grep "${waitForDeploymentName}"  | tr -s " " | cut -d' ' -f1)
 	echo "newPodName: ${newPodName}"
 
 	podIsRunning=false
@@ -38,10 +38,10 @@ function waitForPodToStart() {
 	while [[ $counter -lt 10 ]]; do
 		echo the counter is $counter
 		kubectl get pods --namespace ${nameSpace}
-		newPodStatus=$(kubectl get pods --namespace ${nameSpace} | grep "${requestedPodName}"  | tr -s " " | cut -d' ' -f3)
+		newPodStatus=$(kubectl get pods --namespace ${nameSpace} | grep "${waitForDeploymentName}"  | tr -s " " | cut -d' ' -f3)
 		echo "newPodStatus: ${newPodStatus}"
 		if [ "${newPodStatus}" == "Running" ]; then
-			echo "The new pod running container ${requestedPodName} is ready"
+			echo "The new pod running container ${waitForDeploymentName} is ready"
 			break
 		else
 			echo "The new pod is NOT ready"
@@ -51,10 +51,10 @@ function waitForPodToStart() {
 		counter=$((counter+1))
 	done
 	if [ "${newPodStatus}" != "Running" ]; then
-		echo "The new pod for container ${requestedPodName} never started!"
+		echo "The new pod for container ${waitForDeploymentName} never started!"
 		exit -1
 	fi
-	echo "New Pod ${newPodName}, is running container ${requestedPodName}"
+	echo "New Pod ${newPodName}, is running container ${waitForDeploymentName}"
 }
 
 mkdir -p ${targetImageDir}
@@ -89,9 +89,9 @@ if [ ! -f "${targetImageDir}/debian.tar" ] ; then
 fi
 
 echo "--------------------------------------------------------------"
-echo "Pre-processing kube yaml file"
+echo "Pre-processing kube yaml files"
 echo "--------------------------------------------------------------"
-sed "s+@WORKINGDIR@+${workingDir}+g" deployment/kubernetes/kube-pod.yml > ${workingDir}/kube-pod.yml
+sed "s+@WORKINGDIR@+${workingDir}+g" deployment/kubernetes/kube-deployment.yml > ${workingDir}/kube-deployment.yml
 
 echo "--------------------------------------------------------------"
 echo "Creating service"
@@ -101,11 +101,15 @@ echo "Pausing to give the hub-detect-ws service time to start..."
 sleep 10
 
 echo "--------------------------------------------------------------"
-echo "Creating pod"
+echo "Creating deployment"
 echo "--------------------------------------------------------------"
-kubectl create -f ${workingDir}/kube-pod.yml
-waitForPodToStart ${podName}
+kubectl create -f ${workingDir}/kube-deployment.yml
+waitForPodToStart ${deploymentName}
 
+echo "--------------------------------------------------------------"
+echo "Getting pod name"
+echo "--------------------------------------------------------------"
+echo "The pod name is: ${newPodName}"
 
 echo "--------------------------------------------------------------"
 echo "To use service to get BDIO for alpine"
@@ -115,16 +119,13 @@ clusterIp=$(minikube ip)
 servicePort=8083
 cmd="curl -X POST -i http://${clusterIp}:${servicePort}/scaninspectimage?detect.docker.tar=/opt/blackduck/shared/target/alpine.tar"
 echo "${cmd}"
-######$cmd
 echo "--------------------------------------------------------------"
 echo "To use service to get BDIO for fedora"
 echo "--------------------------------------------------------------"
 cmd="curl -X POST -i http://${clusterIp}:${servicePort}/scaninspectimage?detect.docker.tar=/opt/blackduck/shared/target/fedora.tar"
 echo "${cmd}"
-######$cmd
 echo "--------------------------------------------------------------"
 echo "To use service to get BDIO for debian"
 echo "--------------------------------------------------------------"
 cmd="curl -X POST -i http://${clusterIp}:${servicePort}/scaninspectimage?detect.docker.tar=/opt/blackduck/shared/target/debian.tar"
 echo "${cmd}"
-######$cmd
