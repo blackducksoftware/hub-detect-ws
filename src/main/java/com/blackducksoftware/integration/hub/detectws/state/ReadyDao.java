@@ -36,6 +36,9 @@ import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.detectws.app.exception.ServiceIsBusyException;
 import com.blackducksoftware.integration.hub.detectws.controller.DetectServiceAction;
 
+// TODO not sure a file is the best mechanism for this
+// Maybe there should be at least the option of using a configMap
+// Or maybe the file should just be put in the configMap (like application.properties)
 @Component
 public class ReadyDao {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());

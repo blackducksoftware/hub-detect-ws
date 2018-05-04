@@ -185,7 +185,7 @@ public class DetectServiceAction {
 
     private void downloadDetect(final File pgmDir) throws IOException, InterruptedException, IntegrationException, ExecutableRunnerException {
         logger.info("Downloading detect");
-        // TODO don't download it every time?
+        // TODO don't download it every time? At least be more tolerant of failure if detect is already downloaded
         final Map<String, String> environmentVariables = new HashMap<>();
         final List<String> args = Arrays.asList(FETCH_DETECT_OPTION_SAVE, DETECT_EXE_URL);
         final String detectScriptString = SimpleExecutor.execute(pgmDir, environmentVariables, FETCH_DETECT_CMD, args);
