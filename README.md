@@ -21,7 +21,11 @@ deployment/kubernetes/demo-minikube-pod-initconfig.sh
 minikube dashboard
 ```
 
-Step 3: In the minikube dashboard, in namespace hub-detect-ws, provide connection details to your Hub server by editing the values of properties blackduck.hub.url, blackduck.hub.username, and blackduck.hub.password in Config Map spring-app-config, file application.properties.
+Step 3: In the minikube dashboard, in namespace hub-detect-ws, provide connection details to your Hub server by editing the values of properties blackduck.hub.url, blackduck.hub.username, and blackduck.hub.password in Config Map spring-app-config, file application.properties. The properties are only read on startup of the hub-detect-ws service. Any detect property set here will be passed to detect, with a few exceptions. Properties that you cannot change (your changes will be ignored):
+* logging.level.com.blackducksoftware.integration (set detectws.logging.level instead)
+* detect.source.path 
+* detect.excluded.bom.tool.types
+* detect.output.path
 
 Step 4: Start the pod:
 ```
