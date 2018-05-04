@@ -72,22 +72,22 @@ public class DetectServiceAction {
     @Autowired
     ReadyDao readyDao;
 
-    @Value("${logging.level}")
+    @Value("${detectws.logging.level}")
     private String loggingLevel;
 
-    @Value("${image.inspector.url}")
+    @Value("${detectws.image.inspector.url}")
     private String imageInspectorUrl;
 
-    @Value("${detect.service.shared.dir.path:/opt/blackduck/shared}")
+    @Value("${detectws.detect.service.shared.dir.path:/opt/blackduck/shared}")
     private String detectServiceSharedDirPath;
 
-    @Value("${image.inspector.service.shared.dir.path:/opt/blackduck/shared}")
+    @Value("${detectws.image.inspector.service.shared.dir.path:/opt/blackduck/shared}")
     private String imageInspectorServiceSharedDirPath;
 
-    @Value("${detect.java.opts:}")
+    @Value("${detectws.detect.java.opts:}")
     private String detectJavaOpts;
 
-    @Value("${service.request.timeout.seconds}")
+    @Value("${detectws.service.request.timeout.seconds}")
     private String serviceRequestTimeoutSecondsString;
 
     public String scanImage(final Map<String, String> requestParams)
@@ -150,20 +150,25 @@ public class DetectServiceAction {
     }
 
     private void addApplicationDotPropertiesFileValues(final Map<String, String> detectParams) {
-        logger.info("*** Reading user-specified properties from configMap:");
+        logger.debug("Reading user-specified properties from configMap:");
         for (final Iterator<PropertySource<?>> propertySourceIter = ((AbstractEnvironment) propertySources).getPropertySources().iterator(); propertySourceIter.hasNext();) {
             final PropertySource<?> propertySource = propertySourceIter.next();
             if (propertySource instanceof MapPropertySource) {
-                logger.info(String.format("\tFound property source: %s", propertySource.getName()));
+                logger.debug(String.format("\tFound property source: %s", propertySource.getName()));
                 // TODO is this test reliable?
                 if (propertySource.getName().startsWith("applicationConfig") && propertySource.getName().contains("[file:")) {
-                    logger.info("\t\tAdding these properties to allProperties");
+                    logger.debug("\t\tVetting these properties for detectParams");
                     final Map<String, Object> configMap = ((MapPropertySource) propertySource).getSource();
                     for (final String key : configMap.keySet()) {
-                        logger.info(String.format("\t\t\tChecking type of value of %s", key));
+                        logger.debug(String.format("\t\t\tChecking key prefix of property of %s", key));
+                        if (key.startsWith("detectws.")) {
+                            logger.debug(String.format("\t\t\t %s is a detectws property; omitting it from detect properties", key));
+                            continue;
+                        }
+                        logger.debug(String.format("\t\t\tChecking type of value of property %s", key));
                         final Object value = configMap.get(key);
                         if (value instanceof String) {
-                            logger.info("\t\t\tIt's a String); adding it to detect params");
+                            logger.debug("\t\t\tIt's a String); adding it to detect properties");
                             detectParams.put(key, (String) value);
                         }
                     }
