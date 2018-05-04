@@ -66,12 +66,9 @@ chmod 777 ${targetImageDir}
 chmod 777 ${outputDir}
 
 ensureKubeRunning
-rm -f "${targetImageDir}/alpine.tar"
-rm -f "${targetImageDir}/fedora.tar"
-rm -f "${targetImageDir}/debian.tar"
 
 echo "--------------------------------------------------------------"
-echo "Pulling/saving the target images"
+echo "Pulling/saving the target images (if they don't already exist)"
 echo "--------------------------------------------------------------"
 if [ ! -f "${targetImageDir}/alpine.tar" ] ; then
 	docker pull "alpine:latest"

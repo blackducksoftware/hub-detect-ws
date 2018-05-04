@@ -97,7 +97,7 @@ task createDockerfile(type: Dockerfile) {
             /////// TODO TEMP to work around detect's "docker executable" requirement
             runCommand "touch /usr/local/bin/docker; chmod a+rx /usr/local/bin/docker"
             /////// TODO TEMP force snapshot DI version
-            environmentVariable 'DETECT_DOCKER_PASSTHROUGH_DOCKER_INSPECTOR_VERSION', '5.0.0-SNAPSHOT'
+            environmentVariable 'DETECT_DOCKER_PASSTHROUGH_DOCKER_INSPECTOR_VERSION', '5.0.1-SNAPSHOT'
             /////// END TEMP //////////////////
             user '10001'
             workingDir "${imagePgmDir}"
