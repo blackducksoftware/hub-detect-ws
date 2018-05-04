@@ -55,7 +55,7 @@ public class DetectServiceController {
 
     @RequestMapping(path = READY_TO_SCANINSPECT, method = RequestMethod.GET)
     public ResponseEntity<String> ready(final HttpServletRequest request) {
-        logger.info(String.format("Endpoing %s called:", READY_TO_SCANINSPECT));
+        logger.info(String.format("Endpoint %s called:", READY_TO_SCANINSPECT));
         return imageInspectorHandler.ready(request.getScheme(), request.getServerName(), request.getServerPort(), request.getRequestURI());
     }
 }

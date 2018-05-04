@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -41,6 +42,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.AbstractEnvironment;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.PropertySource;
 import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
@@ -62,16 +67,10 @@ public class DetectServiceAction {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
+    Environment propertySources;
+
+    @Autowired
     ReadyDao readyDao;
-
-    @Value("${hub.url}")
-    private String hubUrl;
-
-    @Value("${hub.username}")
-    private String hubUsername;
-
-    @Value("${hub.password}")
-    private String hubPassword;
 
     @Value("${logging.level}")
     private String loggingLevel;
@@ -88,17 +87,8 @@ public class DetectServiceAction {
     @Value("${detect.java.opts:}")
     private String detectJavaOpts;
 
-    @Value("${detect.hub.signature.scanner.memory:1024}")
-    private String signatureScannerMemoryString;
-
-    @Value("${detect.cleanup.bom.tool.files}")
-    private String detectCleanupBomToolFilesString;
-
     @Value("${service.request.timeout.seconds}")
     private String serviceRequestTimeoutSecondsString;
-
-    @Value("${hub.trust.cert}")
-    private String hubTrustString;
 
     public String scanImage(final Map<String, String> requestParams)
             throws IntegrationException, IOException, InterruptedException, ExecutableRunnerException {
@@ -114,28 +104,20 @@ public class DetectServiceAction {
     }
 
     private void launchDetectAsync(final File pgmDir, final Map<String, String> requestParams) throws IOException {
-        // TODO add support for project name/version with spaces
-        logger.debug(String.format("hubUrl: %s", hubUrl));
-        logger.debug(String.format("hubUsername: %s", hubUsername));
-        logger.debug(String.format("hubPassword: %s", hubPassword));
-        logger.debug(String.format("hubTrustString: %s", hubTrustString));
+
+        // TODO add support for hub project name/version, username, and password with spaces
         logger.debug(String.format("loggingLevel: %s", loggingLevel));
         logger.debug(String.format("imageInspectorUrl: %s", imageInspectorUrl));
         logger.debug(String.format("detectServiceSharedDirPath: %s", detectServiceSharedDirPath));
         logger.debug(String.format("imageInspectorServiceSharedDirPath: %s", imageInspectorServiceSharedDirPath));
-        logger.debug(String.format("detectJavaOpts: %s", detectJavaOpts));
-        logger.debug(String.format("signatureScannerMemoryString: %s", signatureScannerMemoryString));
-        logger.debug(String.format("detectCleanupBomToolFilesString: %s", detectCleanupBomToolFilesString));
         logger.debug(String.format("serviceRequestTimeoutSecondsString: %s", serviceRequestTimeoutSecondsString));
 
         // Build map of properties to pass to detect
-        // Pre-populate it with @Values
-        // Then put values in from requestParams, so in case of conflict: requestParams wins
+        // Pre-populate it with user-provided values from configMap
+        // Then add/overwrite some that hub-detect-ws needs to be set a certain way
+        // Then add/overwrite values in from requestParams, so in case of conflict: requestParams wins
         final Map<String, String> detectParams = new HashMap<>();
-        detectParams.put("blackduck.hub.url", hubUrl);
-        detectParams.put("blackduck.hub.username", hubUsername);
-        detectParams.put("blackduck.hub.password", hubPassword);
-        detectParams.put("blackduck.hub.trust.cert", hubTrustString);
+        addApplicationDotPropertiesFileValues(detectParams);
         detectParams.put("logging.level.com.blackducksoftware.integration", loggingLevel);
         detectParams.put("detect.excluded.bom.tool.types", "GRADLE");
         detectParams.put("detect.docker.passthrough.imageinspector.url", imageInspectorUrl);
@@ -144,12 +126,10 @@ public class DetectServiceAction {
         final long serviceRequestTimeoutSeconds = Integer.parseInt(serviceRequestTimeoutSecondsString);
         final Long serviceRequestTimeoutMilliseconds = serviceRequestTimeoutSeconds * 1000L;
         detectParams.put("detect.docker.passthrough.command.timeout", serviceRequestTimeoutMilliseconds.toString());
-        detectParams.put("detect.cleanup.bom.tool.files", detectCleanupBomToolFilesString);
         // TODO output dir should get cleaned up later somehow
         final String outputFilePath = String.format("%s/run_%d_%d", OUTPUT_DIR_PATH, new Date().getTime(), (int) (Math.random() * 10000));
         detectParams.put("detect.output.path", outputFilePath);
         detectParams.put("detect.docker.passthrough.on.host", "false");
-        detectParams.put("detect.hub.signature.scanner.memory", signatureScannerMemoryString);
         detectParams.put("detect.source.path", SRC_DIR_PATH);
         detectParams.putAll(requestParams);
 
@@ -167,6 +147,29 @@ public class DetectServiceAction {
                 DETECT_EXE_PATH, detectCmdArgs);
         final ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.submit(executor);
+    }
+
+    private void addApplicationDotPropertiesFileValues(final Map<String, String> detectParams) {
+        logger.info("*** Reading user-specified properties from configMap:");
+        for (final Iterator<PropertySource<?>> propertySourceIter = ((AbstractEnvironment) propertySources).getPropertySources().iterator(); propertySourceIter.hasNext();) {
+            final PropertySource<?> propertySource = propertySourceIter.next();
+            if (propertySource instanceof MapPropertySource) {
+                logger.info(String.format("\tFound property source: %s", propertySource.getName()));
+                // TODO is this test reliable?
+                if (propertySource.getName().startsWith("applicationConfig") && propertySource.getName().contains("[file:")) {
+                    logger.info("\t\tAdding these properties to allProperties");
+                    final Map<String, Object> configMap = ((MapPropertySource) propertySource).getSource();
+                    for (final String key : configMap.keySet()) {
+                        logger.info(String.format("\t\t\tChecking type of value of %s", key));
+                        final Object value = configMap.get(key);
+                        if (value instanceof String) {
+                            logger.info("\t\t\tIt's a String); adding it to detect params");
+                            detectParams.put(key, (String) value);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private List<String> propertiesToArgs(final Map<String, String> properties) {
