@@ -21,7 +21,7 @@ deployment/kubernetes/demo-minikube-pod-initconfig.sh
 minikube dashboard
 ```
 
-Step 3: In the minikube dashboard, in namespace hub-detect-ws, provide connection details to your Hub server by editing the values of properties hub.url, hub.username, and hub.password in Config Map spring-app-config, file application.properties.
+Step 3: In the minikube dashboard, in namespace hub-detect-ws, provide connection details to your Hub server by editing the values of properties blackduck.hub.url, blackduck.hub.username, and blackduck.hub.password in Config Map spring-app-config, file application.properties.
 
 Step 4: Start the pod:
 ```
@@ -42,8 +42,6 @@ curl -X GET  -i http://$(minikube ip):8083/ready # wait for a 200 response
 ```
 
 From each POST to /scaninspectimage, you should get an HTTP 202 response indicating that the request was accepted. While the request is being processed, the /ready endpoint will return 503. When processing of that request has finished, a Scan and a BOM will appear on the Hub's Scans screen, and the /ready endpoint will return 200. 
-
-Subsequent runs on the same tarfile will hit a permission error writing the container filesystem output file. Executing "rm -rf ~/hub-detect-ws/shared/output/*.gz" between runs will avoid this.
 
 To delete the pod and the service from the cluster:
 
@@ -74,7 +72,7 @@ TBD
 You can download the latest source from GitHub: https://github.com/blackducksoftware/hub-detect-ws. 
 
 # Documentation #
-hub-detect-ws is under development. You can use the provided scripts to try a pre-release version in either a Kubernetes or a Docker environment.
+hub-detect-ws is under development. There is no documentation yet other than this README file.
 
 ## Primary Endpoints ##
 
