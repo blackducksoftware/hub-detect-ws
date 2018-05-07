@@ -38,6 +38,36 @@ spec:
         resources:
           limits:
             memory: 2Gi
+      volumes:
+      - name: blackduck-shared-dir
+        hostPath:
+          path: @WORKINGDIR@/shared
+          type: Directory
+      - name: application-config
+        configMap:
+          name: spring-app-config
+          items:
+          - key: application.properties
+            path: application.properties
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hub-imageinspector-ws
+  namespace: hub-detect-ws
+  labels:
+    app: hub-imageinspector-ws
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hub-imageinspector-ws
+  template:
+    metadata:
+      labels:
+        app: hub-imageinspector-ws
+    spec:
+      containers:
       - name: hub-imageinspector-ws-alpine
         image: blackducksoftware/hub-imageinspector-ws-alpine:1.0.1-SNAPSHOT
         volumeMounts:

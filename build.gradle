@@ -85,7 +85,7 @@ task createDockerfile(type: Dockerfile) {
             exposePort 8083
             // TODO remove: runCommand 'apk update && apk add bash && apk add openjdk8-jre && apk add curl && apk add file'
             runCommand 'apt-get update -y && \
-                apt install -y openjdk-8-jdk vim curl && \
+                apt install -y openjdk-8-jdk vim curl dnsutils && \
                 apt-get -y clean'
             runCommand "mkdir -p ${imagePgmDir}/target"
             

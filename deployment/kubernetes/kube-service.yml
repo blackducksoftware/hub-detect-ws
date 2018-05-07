@@ -13,3 +13,19 @@ spec:
   selector:
     app: hub-detect-ws
   type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hub-imageinspector-ws
+  namespace: hub-detect-ws
+  labels:
+    app: hub-imageinspector-ws
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: hub-detect-ws
+  type: NodePort
