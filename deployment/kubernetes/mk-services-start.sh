@@ -5,9 +5,13 @@ sharedDir="${workingDir}/shared"
 targetImageDir="${sharedDir}/target"
 outputDir="${sharedDir}/output"
 
-serviceName=hub-detect-ws
-deploymentName=${serviceName}
-nameSpace=${serviceName}
+detectServiceName=hub-detect-ws
+detectDeploymentName=${detectServiceName}
+
+imageInspectorServiceName=hub-imageinspector-ws
+imageInspectorDeploymentName=${imageInspectorServiceName}
+
+nameSpace=${detectServiceName}
 minikubeMemory=8000
 
 function ensureKubeRunning() {
@@ -91,25 +95,23 @@ fi
 echo "--------------------------------------------------------------"
 echo "Pre-processing kube yaml files"
 echo "--------------------------------------------------------------"
-sed "s+@WORKINGDIR@+${workingDir}+g" deployment/kubernetes/kube-deployment.yml > ${workingDir}/kube-deployment.yml
+sed "s+@WORKINGDIR@+${workingDir}+g" deployment/kubernetes/kube-detect-service.yml > ${workingDir}/kube-detect-service.yml
+sed "s+@WORKINGDIR@+${workingDir}+g" deployment/kubernetes/kube-imageinspector-service.yml > ${workingDir}/kube-imageinspector-service.yml
 
 echo "--------------------------------------------------------------"
-echo "Creating service"
+echo "Creating services and deployments"
 echo "--------------------------------------------------------------"
-kubectl create -f deployment/kubernetes/kube-service.yml
-echo "Pausing to give the hub-detect-ws service time to start..."
-sleep 10
+kubectl create -f ${workingDir}/kube-imageinspector-service.yml
+waitForPodToStart ${imageInspectorDeploymentName}
+
+kubectl create -f ${workingDir}/kube-detect-service.yml
+waitForPodToStart ${detectDeploymentName}
+detectPodName=${newPodName}
 
 echo "--------------------------------------------------------------"
-echo "Creating deployment"
+echo "Getting detect pod name"
 echo "--------------------------------------------------------------"
-kubectl create -f ${workingDir}/kube-deployment.yml
-waitForPodToStart ${deploymentName}
-
-echo "--------------------------------------------------------------"
-echo "Getting pod name"
-echo "--------------------------------------------------------------"
-echo "The pod name is: ${newPodName}"
+echo "The detect pod name is: ${detectPodName}"
 
 echo "--------------------------------------------------------------"
 echo "To use service to get BDIO for alpine"

@@ -17,7 +17,7 @@ cd hub-detect-ws
 
 Step 2: Initialize the configmap and start the minikube dashboard:
 ```
-deployment/kubernetes/demo-minikube-pod-initconfig.sh
+deployment/kubernetes/mk-initconfig.sh
 minikube dashboard
 ```
 
@@ -29,7 +29,7 @@ Step 3: In the minikube dashboard, in namespace hub-detect-ws, provide connectio
 
 Step 4: Start the pod:
 ```
-deployment/kubernetes/demo-minikube-pod-start.sh
+deployment/kubernetes/mk-services-start.sh
 ```
 
 Step 5: Test the service. 
@@ -50,7 +50,7 @@ From each POST to /scaninspectimage, you should get an HTTP 202 response indicat
 To delete the pod and the service from the cluster:
 
 ```
-deployment/kubernetes/demo-minikube-pod-stop.sh
+deployment/kubernetes/mk-services-stop.sh
 ```
 
 ## Troubleshooting
@@ -59,22 +59,22 @@ To get the hub-detect-ws pod name, either:
 1. See the output of the start script.
 1. Run the following command:
 ```
-newPodName=$(kubectl get pods --namespace hub-detect-ws | grep "hub-detect-ws"  | tr -s " " | cut -d' ' -f1)
+detectPodName=$(kubectl get pods --namespace hub-detect-ws | grep "hub-detect-ws"  | tr -s " " | cut -d' ' -f1)
 ```
 
 
 To get the log from the service:
 
 ```
-kubectl logs --namespace hub-detect-ws <hub-detect-ws pod name> -c hub-detect-ws
+kubectl logs --namespace hub-detect-ws ${detectPodName} -c hub-detect-ws
 ```
 
 To get logs from the supporting services:
 
 ```
-kubectl logs --namespace hub-detect-ws <hub-detect-ws pod name> -c hub-imageinspector-ws-alpine
-kubectl logs --namespace hub-detect-ws <hub-detect-ws pod name> -c hub-imageinspector-ws-centos
-kubectl logs --namespace hub-detect-ws <hub-detect-ws pod name> -c hub-imageinspector-ws-ubuntu
+kubectl logs --namespace hub-detect-ws ${detectPodName} -c hub-imageinspector-ws-alpine
+kubectl logs --namespace hub-detect-ws ${detectPodName} -c hub-imageinspector-ws-centos
+kubectl logs --namespace hub-detect-ws ${detectPodName} -c hub-imageinspector-ws-ubuntu
 ```
 
 # Build
