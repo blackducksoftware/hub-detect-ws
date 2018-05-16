@@ -7,7 +7,7 @@ metadata:
     app: hub-imageinspector-ws
 spec:
   ports:
-  - port: 8080
+  - port: 9000
     targetPort: 8080
     protocol: TCP
   selector:
@@ -35,17 +35,17 @@ spec:
       - name: hub-imageinspector-ws-alpine
         image: blackducksoftware/hub-imageinspector-ws-alpine:1.1.2-SNAPSHOT
         command: ["java"]
-        args: ["-jar", "/opt/blackduck/hub-imageinspector-ws/hub-imageinspector-ws.jar", "--server.port=8080", "--current.linux.distro=alpine", "--inspector.port.alpine=8080", "--inspector.port.centos=8081", "--inspector.port.ubuntu=8082"]
+        args: ["-jar", "/opt/blackduck/hub-imageinspector-ws/hub-imageinspector-ws.jar", "--server.port=8080", "--current.linux.distro=alpine", "--inspector.port.alpine=9000", "--inspector.port.centos=9001", "--inspector.port.ubuntu=9002"]
         volumeMounts:
         - name: blackduck-shared-dir
           mountPath: /opt/blackduck/shared
         ports:
         - containerPort: 8080
-          hostPort: 8080
+          hostPort: 9000
         livenessProbe:
           httpGet:
             path: /health
-            port: 8080
+            port: 9000
           initialDelaySeconds: 120
           periodSeconds: 960
           timeoutSeconds: 480
@@ -55,17 +55,17 @@ spec:
       - name: hub-imageinspector-ws-centos
         image: blackducksoftware/hub-imageinspector-ws-centos:1.1.2-SNAPSHOT
         command: ["java"]
-        args: ["-jar", "/opt/blackduck/hub-imageinspector-ws/hub-imageinspector-ws.jar", "--server.port=8081", "--current.linux.distro=centos", "--inspector.port.alpine=8080", "--inspector.port.centos=8081", "--inspector.port.ubuntu=8082"]
+        args: ["-jar", "/opt/blackduck/hub-imageinspector-ws/hub-imageinspector-ws.jar", "--server.port=8081", "--current.linux.distro=centos", "--inspector.port.alpine=9000", "--inspector.port.centos=9001", "--inspector.port.ubuntu=9002"]
         volumeMounts:
         - name: blackduck-shared-dir
           mountPath: /opt/blackduck/shared
         ports:
         - containerPort: 8081
-          hostPort: 8081
+          hostPort: 9001
         livenessProbe:
           httpGet:
             path: /health
-            port: 8081
+            port: 9001
           initialDelaySeconds: 120
           periodSeconds: 960
           timeoutSeconds: 480
@@ -75,17 +75,17 @@ spec:
       - name: hub-imageinspector-ws-ubuntu
         image: blackducksoftware/hub-imageinspector-ws-ubuntu:1.1.2-SNAPSHOT
         command: ["java"]
-        args: ["-jar", "/opt/blackduck/hub-imageinspector-ws/hub-imageinspector-ws.jar", "--server.port=8082", "--current.linux.distro=ubuntu", "--inspector.port.alpine=8080", "--inspector.port.centos=8081", "--inspector.port.ubuntu=8082"]
+        args: ["-jar", "/opt/blackduck/hub-imageinspector-ws/hub-imageinspector-ws.jar", "--server.port=8082", "--current.linux.distro=ubuntu", "--inspector.port.alpine=9000", "--inspector.port.centos=9001", "--inspector.port.ubuntu=9002"]
         volumeMounts:
         - name: blackduck-shared-dir
           mountPath: /opt/blackduck/shared
         ports:
         - containerPort: 8082
-          hostPort: 8082
+          hostPort: 9002
         livenessProbe:
           httpGet:
             path: /health
-            port: 8082
+            port: 9002
           initialDelaySeconds: 120
           periodSeconds: 960
           timeoutSeconds: 480
