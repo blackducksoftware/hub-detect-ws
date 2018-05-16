@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
       - name: hub-imageinspector-ws-alpine
-        image: blackducksoftware/hub-imageinspector-ws-alpine:1.0.1-SNAPSHOT
+        image: blackducksoftware/hub-imageinspector-ws-alpine:1.1.2-SNAPSHOT
         volumeMounts:
         - name: blackduck-shared-dir
           mountPath: /opt/blackduck/shared
@@ -51,7 +51,7 @@ spec:
           limits:
             memory: 1Gi
       - name: hub-imageinspector-ws-centos
-        image: blackducksoftware/hub-imageinspector-ws-centos:1.0.1-SNAPSHOT
+        image: blackducksoftware/hub-imageinspector-ws-centos:1.1.2-SNAPSHOT
         volumeMounts:
         - name: blackduck-shared-dir
           mountPath: /opt/blackduck/shared
@@ -69,7 +69,7 @@ spec:
           limits:
             memory: 1Gi
       - name: hub-imageinspector-ws-ubuntu
-        image: blackducksoftware/hub-imageinspector-ws-ubuntu:1.0.1-SNAPSHOT
+        image: blackducksoftware/hub-imageinspector-ws-ubuntu:1.1.2-SNAPSHOT
         volumeMounts:
         - name: blackduck-shared-dir
           mountPath: /opt/blackduck/shared

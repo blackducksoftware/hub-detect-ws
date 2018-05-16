@@ -140,5 +140,7 @@ task buildKubeTestPodConfig(type: Copy) {
     filter(ReplaceTokens, tokens: [CURRENT_DIR: System.getProperty("user.dir"), VERSION: version])
 }
 
-testIntegration.dependsOn buildKubeTestPodConfig
+task testPrep(dependsOn: buildKubeTestPodConfig) {}
+
+testIntegration.dependsOn testPrep
 testIntegration.dependsOn buildImage
