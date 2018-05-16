@@ -34,6 +34,8 @@ spec:
       containers:
       - name: hub-imageinspector-ws-alpine
         image: blackducksoftware/hub-imageinspector-ws-alpine:1.1.2-SNAPSHOT
+        command: ["java"]
+        args: ["-jar", "/opt/blackduck/hub-imageinspector-ws/hub-imageinspector-ws.jar", "--server.port=8080", "--current.linux.distro=alpine", "--inspector.port.alpine=8080", "--inspector.port.centos=8081", "--inspector.port.ubuntu=8082"]
         volumeMounts:
         - name: blackduck-shared-dir
           mountPath: /opt/blackduck/shared
@@ -52,6 +54,8 @@ spec:
             memory: 1Gi
       - name: hub-imageinspector-ws-centos
         image: blackducksoftware/hub-imageinspector-ws-centos:1.1.2-SNAPSHOT
+        command: ["java"]
+        args: ["-jar", "/opt/blackduck/hub-imageinspector-ws/hub-imageinspector-ws.jar", "--server.port=8081", "--current.linux.distro=centos", "--inspector.port.alpine=8080", "--inspector.port.centos=8081", "--inspector.port.ubuntu=8082"]
         volumeMounts:
         - name: blackduck-shared-dir
           mountPath: /opt/blackduck/shared
@@ -70,6 +74,8 @@ spec:
             memory: 1Gi
       - name: hub-imageinspector-ws-ubuntu
         image: blackducksoftware/hub-imageinspector-ws-ubuntu:1.1.2-SNAPSHOT
+        command: ["java"]
+        args: ["-jar", "/opt/blackduck/hub-imageinspector-ws/hub-imageinspector-ws.jar", "--server.port=8082", "--current.linux.distro=ubuntu", "--inspector.port.alpine=8080", "--inspector.port.centos=8081", "--inspector.port.ubuntu=8082"]
         volumeMounts:
         - name: blackduck-shared-dir
           mountPath: /opt/blackduck/shared
